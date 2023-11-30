@@ -1,9 +1,16 @@
 package ru.otus.hw.dao;
 
+import com.opencsv.bean.ColumnPositionMappingStrategyBuilder;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.MappingStrategy;
 import lombok.RequiredArgsConstructor;
 import ru.otus.hw.config.TestFileNameProvider;
+import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
+import ru.otus.hw.exceptions.QuestionReadException;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,11 +20,27 @@ public class CsvQuestionDao implements QuestionDao {
 
     @Override
     public List<Question> findAll() {
-        // Использовать CsvToBean
-        // https://opencsv.sourceforge.net/#collection_based_bean_fields_one_to_many_mappings
-        // Использовать QuestionReadException
-        // Про ресурсы: https://mkyong.com/java/java-read-a-file-from-resources-folder/
+        try {
+            InputStream is = getClass().getClassLoader().getResourceAsStream(fileNameProvider.getTestFileName());
+            MappingStrategy<QuestionDto> strategy = new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
+            strategy.setType(QuestionDto.class);
 
-        return new ArrayList<>();
+            List<QuestionDto> parseList = new CsvToBeanBuilder<QuestionDto>(new InputStreamReader(is))
+                    .withExceptionHandler(e -> {
+                        throw new QuestionReadException(
+                                String.format("Ошибка при чтении вопроса из строки %d (%s)",
+                                        e.getLineNumber(), e.getLine()), e.getCause());
+                    }).withMappingStrategy(strategy).withSeparator(';').withSkipLines(1).build().parse();
+
+            List<Question> result = new ArrayList<>(parseList.size());
+            for (QuestionDto questionDto : parseList) {
+                if (questionDto != null) {
+                    result.add(questionDto.toDomainObject());
+                }
+            }
+            return result;
+        } catch (Exception ex) {
+            throw new QuestionReadException("Непредвиденная ошибка при чтении списка вопросов", ex);
+        }
     }
 }
