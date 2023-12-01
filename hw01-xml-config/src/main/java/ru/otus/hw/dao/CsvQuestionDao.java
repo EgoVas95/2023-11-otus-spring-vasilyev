@@ -3,11 +3,12 @@ package ru.otus.hw.dao;
 import com.opencsv.bean.ColumnPositionMappingStrategyBuilder;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.MappingStrategy;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
 import ru.otus.hw.exceptions.QuestionReadException;
+import ru.otus.hw.service.InputStreamGetter;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,21 +17,22 @@ import java.util.List;
 
 @RequiredArgsConstructor
 public class CsvQuestionDao implements QuestionDao {
-    private final TestFileNameProvider fileNameProvider;
+    @NonNull
+    private final InputStreamGetter inputStreamGetter;
 
     @Override
     public List<Question> findAll() {
         try {
-            InputStream is = getClass().getClassLoader().getResourceAsStream(fileNameProvider.getTestFileName());
+            InputStream is = inputStreamGetter.getInputStream();
+
             MappingStrategy<QuestionDto> strategy = new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
             strategy.setType(QuestionDto.class);
 
             List<QuestionDto> parseList = new CsvToBeanBuilder<QuestionDto>(new InputStreamReader(is))
                     .withExceptionHandler(e -> {
-                        throw new QuestionReadException(
-                                String.format("Ошибка при чтении вопроса из строки %d (%s)",
-                                        e.getLineNumber(), e.getLine()), e.getCause());
-                    }).withMappingStrategy(strategy).withSeparator(';').withSkipLines(1).build().parse();
+                throw new QuestionReadException(String.format("Ошибка при чтении вопроса из строки %d (%s)",
+                        e.getLineNumber(), e.getLine()), e.getCause());
+            }).withMappingStrategy(strategy).withSeparator(';').withSkipLines(1).build().parse();
 
             List<Question> result = new ArrayList<>(parseList.size());
             for (QuestionDto questionDto : parseList) {

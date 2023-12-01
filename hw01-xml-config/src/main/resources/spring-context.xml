@@ -9,18 +9,24 @@
     <bean id="fileName" class="ru.otus.hw.config.AppProperties">
         <constructor-arg name="testFileName" value="questions.csv"/>
     </bean>
-    <bean id="questionDao" class="ru.otus.hw.dao.CsvQuestionDao">
+    <bean id="inputStreamGetter" class="ru.otus.hw.service.InputStreamForFilenameProvider">
         <constructor-arg name="fileNameProvider" ref="fileName"/>
     </bean>
+    <bean id="questionDao" class="ru.otus.hw.dao.CsvQuestionDao">
+        <constructor-arg name="inputStreamGetter" ref="inputStreamGetter"/>
+    </bean>
+
     <bean id="ioService" class="ru.otus.hw.service.StreamsIOService">
         <constructor-arg index="0">
             <util:constant static-field="java.lang.System.out"/>
         </constructor-arg>
     </bean>
+
     <bean id="testService" class="ru.otus.hw.service.TestServiceImpl">
         <constructor-arg name="ioService" ref="ioService"/>
         <constructor-arg name="questionDao" ref="questionDao"/>
     </bean>
+
     <bean id="testRunner" class="ru.otus.hw.service.TestRunnerServiceImpl">
         <constructor-arg name="testService" ref="testService"/>
     </bean>

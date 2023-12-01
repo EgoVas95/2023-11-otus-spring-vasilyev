@@ -9,6 +9,7 @@ import ru.otus.hw.domain.Question;
 public class TestServiceImpl implements TestService {
 
     private final IOService ioService;
+
     private final QuestionDao questionDao;
 
     @Override
@@ -16,7 +17,7 @@ public class TestServiceImpl implements TestService {
         ioService.printLine("");
         ioService.printFormattedLine("Please answer the questions below%n");
         // Получить вопросы из дао и вывести их с вариантами ответов
-        if (ioService != null && questionDao != null) {
+        if (questionDao != null) {
             for (Question question : questionDao.findAll()) {
                 if (question != null && question.text() != null) {
                     ioService.printLine(QuestionStringFormatter.formatQuestion(question));

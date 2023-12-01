@@ -5,18 +5,20 @@ import ru.otus.hw.domain.Question;
 
 public final class QuestionStringFormatter {
     public static String formatQuestion(Question question) {
-        String res = null;
-        if (question != null && question.text() != null) {
-            res = String.format("%s: \n", question.text());
-            if (question.answers() != null) {
-                int num = 1;
-                for (Answer answer : question.answers()) {
-                    if (answer != null && answer.text() != null) {
-                        res = res.concat(String.format("%d) %s\t", num++, answer.text()));
-                    }
-                }
-            }
+        if (question == null || question.text().trim().isEmpty()) {
+           return null;
         }
-        return res;
+        String res = String.format("%s: \n", question.text());
+        if (question.answers() == null || question.answers().isEmpty()) {
+            return res;
+        }
+        int num = 1;
+        for (Answer answer : question.answers()) {
+            if (answer.text() == null || answer.text().trim().isEmpty()) {
+                continue;
+            }
+            res = res.concat(String.format("%d) %s\t", num++, answer.text().trim()));
+        }
+        return res.concat("\n");
     }
 }
