@@ -11,9 +11,12 @@ public class InputStreamForFilenameProvider implements InputStreamGetter {
     private final TestFileNameProvider fileNameProvider;
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream() throws Exception {
         if (fileNameProvider == null || fileNameProvider.getTestFileName() == null) {
-            throw new IOException("Ошибка при чтении файла! Не передан файл для чтения вопросов!");
+            throw new NullPointerException("Ошибка при чтении файла! Не передан файл для чтения вопросов!");
+        }
+        if (!fileNameProvider.getTestFileName().endsWith(".csv")) {
+            throw new IOException("Ошибка при чтении файла! Неподдерживаемый формат файла!");
         }
 
         ClassLoader classLoader = getClass().getClassLoader();
