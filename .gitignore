@@ -1,0 +1,7 @@
+**/*.iml
+**/.project
+**/.idea
+**/.settings
+**/target
+**/.github
+
