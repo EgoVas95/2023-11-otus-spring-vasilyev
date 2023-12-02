@@ -20,6 +20,5 @@ jobs:
           cache: maven
 
       - name: Build application
-        working-directory: ./home_works
         run: |
           mvn verify --no-transfer-progress
