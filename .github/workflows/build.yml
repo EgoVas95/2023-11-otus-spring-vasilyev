@@ -11,17 +11,16 @@ jobs:
 
     steps:
       - name: Checkout repo
-      - working-directory: ./home_works
       - uses: actions/checkout@v4
 
       - name: Set up JDK 17
       - uses: actions/setup-java@v3
-      - with:
+        with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
       - name: Build application
-      - working-directory: ./home_works
-      - run: |
+        working-directory: ./home_works
+        run: |
           mvn verify --no-transfer-progress
