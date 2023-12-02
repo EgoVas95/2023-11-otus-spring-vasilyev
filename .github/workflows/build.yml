@@ -20,6 +20,5 @@ jobs:
           cache: maven
 
       - name: Build application
-        working-directory: ./2023-11-otus-spring-vasilyev
         run: |
           mvn clean install -X
