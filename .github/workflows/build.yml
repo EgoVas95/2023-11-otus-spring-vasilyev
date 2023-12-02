@@ -2,7 +2,7 @@ name: Build
 
 on:
   pull_request:
-    types: [opened, reopened, edited, ready_for_review, review_requested, review_request_removed]
+    types: [opened, reopened, edited, ready_for_review, review_requested]
 
 jobs:
   build-app:
