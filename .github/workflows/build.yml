@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, ready_for_review, review_requested, review_request_removed]
+    branches: main
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+      - working-directory: ./home_works
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+      - uses: actions/setup-java@v3
+      - with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build application
+      - working-directory: ./home_works
+      - run: |
+          mvn verify --no-transfer-progress
