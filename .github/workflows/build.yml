@@ -21,4 +21,4 @@ jobs:
 
       - name: Build application
         run: |
-          mvn verify --no-transfer-progress
+          mvn clean install -X
