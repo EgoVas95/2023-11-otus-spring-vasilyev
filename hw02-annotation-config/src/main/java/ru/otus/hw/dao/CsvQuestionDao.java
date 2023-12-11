@@ -4,9 +4,7 @@ import com.opencsv.bean.ColumnPositionMappingStrategyBuilder;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.MappingStrategy;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import ru.otus.hw.config.TestFileNameProvider;
 import ru.otus.hw.dao.dto.QuestionDto;
 import ru.otus.hw.domain.Question;
@@ -26,7 +24,6 @@ public class CsvQuestionDao implements QuestionDao {
     public List<Question> findAll() {
         ClassLoader classLoader = getClass().getClassLoader();
         try (InputStream is = classLoader.getResourceAsStream(fileNameProvider.getTestFileName())) {
-
             MappingStrategy<QuestionDto> strategy =
                     new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
             strategy.setType(QuestionDto.class);

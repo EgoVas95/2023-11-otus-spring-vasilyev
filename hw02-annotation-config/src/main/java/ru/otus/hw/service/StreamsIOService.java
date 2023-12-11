@@ -33,11 +33,6 @@ public class StreamsIOService implements IOService {
     }
 
     @Override
-    public String readString() {
-        return scanner.nextLine();
-    }
-
-    @Override
     public String readStringWithPrompt(String prompt) {
         printLine(prompt);
         return scanner.nextLine();
