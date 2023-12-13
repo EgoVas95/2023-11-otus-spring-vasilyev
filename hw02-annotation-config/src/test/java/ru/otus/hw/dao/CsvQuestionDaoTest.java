@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.hw.config.AppProperties;
 import ru.otus.hw.exceptions.QuestionReadException;
 
+import static org.assertj.core.api.Assertions.assertThatList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
@@ -31,10 +32,18 @@ class CsvQuestionDaoTest {
         assertThrows(QuestionReadException.class, dao::findAll);
     }
 
+    @DisplayName("Выдаст ошибку из-за неверного формата вопроса")
+    @Test
+    void shouldThrowUnsupportedQuestionFormatException() {
+        given(appProperties.getTestFileName()).willReturn("error.test.questions.csv");
+        assertThrows(QuestionReadException.class, dao::findAll);
+    }
+
     @DisplayName("Должен отработать без ошибок")
     @Test
     void shouldNotThrowExceptions() {
-        given(appProperties.getTestFileName()).willReturn("questions.csv");
-        assertDoesNotThrow(dao::findAll);
+        given(appProperties.getTestFileName()).willReturn("test.questions.csv");
+        assertThatList(dao.findAll()).isNotNull().isNotEmpty()
+                .hasSize(2);
     }
 }
