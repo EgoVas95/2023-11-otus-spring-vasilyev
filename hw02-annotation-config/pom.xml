@@ -21,6 +21,7 @@
                 <version>${maven.shade.plugin.version}</version>
                 <executions>
                     <execution>
+                        <id>homework_02</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>

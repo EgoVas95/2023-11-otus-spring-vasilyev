@@ -11,14 +11,15 @@ import ru.otus.hw.domain.TestResult;
 @Service
 public class TestServiceImpl implements TestService {
 
-    private final IOService ioService;
+    private final LocalizedIOService ioService;
 
     private final QuestionDao questionDao;
 
     @Override
     public TestResult executeTestFor(Student student) {
         ioService.printLine("");
-        ioService.printFormattedLine("Please answer the questions below%n");
+        ioService.printLocalized("TestService.excecute.greeting");
+        ioService.printLine("");
         var questions = questionDao.findAll();
         var testResult = new TestResult(student);
 
@@ -27,10 +28,11 @@ public class TestServiceImpl implements TestService {
 
             var answerIdx = ioService.readIntForRangeWithPrompt(0, maxQuestionSize,
                     QuestionStringFormatter.formatQuestion(question),
-                    "Accept only numbers from 1 to " + maxQuestionSize);
+                    ioService.getMessage("TestService.excecute.number.format.read.error",
+                            maxQuestionSize));
             Answer answer = question.answers().get(answerIdx);
 
-            var isAnswerValid = answer.isCorrect(); // Задать вопрос, получить ответ
+            var isAnswerValid = answer.isCorrect();
             testResult.applyAnswer(question, isAnswerValid);
         }
         return testResult;

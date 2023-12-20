@@ -1,0 +1,5 @@
+    ${AnsiColor.RED}(◕‿◕) ${AnsiColor.GREEN}(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ ${AnsiColor.BLUE}٩(◕‿◕)۶
+
+    ${AnsiColor.YELLOW}★★★★★★★ ТЕСТОВЫЙ БАННЕР ★★★★★★★
+
+    ${AnsiColor.CYAN}٩(◕‿◕｡)۶ ${AnsiColor.BRIGHT_RED}°˖✧◝(⁰▿⁰)◜✧˖° ${AnsiColor.BRIGHT_MAGENTA}(⁄ ⁄•⁄ω⁄•⁄ ⁄)
