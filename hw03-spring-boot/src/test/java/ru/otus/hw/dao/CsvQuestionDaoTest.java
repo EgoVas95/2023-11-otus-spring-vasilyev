@@ -24,7 +24,7 @@ class CsvQuestionDaoTest {
 
     @BeforeEach
     void setUp() {
-        dao = new CsvQuestionDao(appProperties, appProperties);
+        dao = new CsvQuestionDao(appProperties);
     }
 
     @DisplayName("Должен выдать ошибку на пустой InputStream")
@@ -36,14 +36,14 @@ class CsvQuestionDaoTest {
     @DisplayName("Выдаст ошибку из-за неверного формата вопроса")
     @Test
     void shouldThrowUnsupportedQuestionFormatException() {
-        given(appProperties.getTestFileNameByLocaleTag(any())).willReturn("error.test.questions.csv");
+        given(appProperties.getTestFileNameByLocaleTag()).willReturn("error.test.questions.csv");
         assertThrows(QuestionReadException.class, dao::findAll);
     }
 
     @DisplayName("Должен отработать без ошибок")
     @Test
     void shouldNotThrowExceptions() {
-        given(appProperties.getTestFileNameByLocaleTag(any())).willReturn("test.questions.csv");
+        given(appProperties.getTestFileNameByLocaleTag()).willReturn("test.questions.csv");
         assertThatList(dao.findAll()).isNotNull().isNotEmpty()
                 .hasSize(2);
     }

@@ -9,3 +9,4 @@ application:
   fileNameByLocaleTag:
     ru_RU: questions_ru.csv
     en_US: questions.csv
+    en_EN: questions.csv

@@ -20,16 +20,14 @@ import java.util.List;
 @Component
 public class CsvQuestionDao implements QuestionDao {
 
-    private final LocaleConfig localeConfig;
-
     private final TestFileNameProvider fileNameProvider;
 
     @Override
     public List<Question> findAll() {
         ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream is = classLoader.getResourceAsStream(fileNameProvider.getTestFileNameByLocaleTag(
-                localeConfig.getLocale()))) {
-            MappingStrategy<QuestionDto> strategy = new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
+        try (InputStream is = classLoader.getResourceAsStream(fileNameProvider.getTestFileNameByLocaleTag())) {
+            MappingStrategy<QuestionDto> strategy =
+                    new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
             strategy.setType(QuestionDto.class);
 
             List<QuestionDto> parseList = new CsvToBeanBuilder<QuestionDto>(
