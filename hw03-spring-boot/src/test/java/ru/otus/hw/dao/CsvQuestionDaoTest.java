@@ -36,14 +36,14 @@ class CsvQuestionDaoTest {
     @DisplayName("Выдаст ошибку из-за неверного формата вопроса")
     @Test
     void shouldThrowUnsupportedQuestionFormatException() {
-        given(appProperties.getTestFileNameByLocaleTag()).willReturn("error.test.questions.csv");
+        given(appProperties.getTestFileName()).willReturn("error.test.questions.csv");
         assertThrows(QuestionReadException.class, dao::findAll);
     }
 
     @DisplayName("Должен отработать без ошибок")
     @Test
     void shouldNotThrowExceptions() {
-        given(appProperties.getTestFileNameByLocaleTag()).willReturn("test.questions.csv");
+        given(appProperties.getTestFileName()).willReturn("test.questions.csv");
         assertThatList(dao.findAll()).isNotNull().isNotEmpty()
                 .hasSize(2);
     }
