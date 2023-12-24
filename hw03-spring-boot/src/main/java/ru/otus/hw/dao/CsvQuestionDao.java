@@ -25,7 +25,7 @@ public class CsvQuestionDao implements QuestionDao {
     @Override
     public List<Question> findAll() {
         ClassLoader classLoader = getClass().getClassLoader();
-        try (InputStream is = classLoader.getResourceAsStream(fileNameProvider.getTestFileNameByLocaleTag())) {
+        try (InputStream is = classLoader.getResourceAsStream(fileNameProvider.getTestFileName())) {
             MappingStrategy<QuestionDto> strategy =
                     new ColumnPositionMappingStrategyBuilder<QuestionDto>().build();
             strategy.setType(QuestionDto.class);
