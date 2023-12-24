@@ -22,7 +22,7 @@ public class AppProperties implements TestConfig, TestFileNameProvider, LocaleCo
     }
 
     @Override
-    public String getTestFileNameByLocaleTag() {
+    public String getTestFileName() {
         return fileNameByLocaleTag.get(locale);
     }
 
