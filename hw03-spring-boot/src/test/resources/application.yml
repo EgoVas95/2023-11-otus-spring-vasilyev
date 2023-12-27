@@ -1,5 +1,4 @@
-spring:
-  command:
-    line:
-      runner:
-        enabled: false
+command:
+  line:
+    runner:
+      enabled: false
