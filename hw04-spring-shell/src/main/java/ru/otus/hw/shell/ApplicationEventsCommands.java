@@ -17,10 +17,13 @@ import ru.otus.hw.service.TestService;
 public class ApplicationEventsCommands {
 
     private final TestService testService;
+
     private final StudentService studentService;
+
     private final ResultService resultService;
 
     private Student student;
+
     private TestResult testResult;
 
     @ShellMethod(value = "Start all process for testing command", key = {"s", "start"})
