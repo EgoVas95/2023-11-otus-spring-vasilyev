@@ -1,4 +1,11 @@
-command:
-  line:
-    runner:
-      enabled: false
+spring:
+  command:
+    line:
+      runner:
+        enabled: false
+main:
+  allow-circular-references: true
+  command:
+    line:
+      runner:
+        enabled: false
