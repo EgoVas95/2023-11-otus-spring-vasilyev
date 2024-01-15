@@ -27,39 +27,38 @@ public class JdbcBookRepository implements BookRepository {
 
     @Override
     public Optional<Book> findById(long id) {
-        Book book = null;
-        try {
-            book = namedParameterJdbcOperations.queryForObject("""
-                    select b.id, b.title, b.author_id, b.genre_id,
-                            g.id, g.name,
-                            a.id, a.full_name
-                     from books b 
-                     inner join genres g 
-                         on b.genre_id = g.id
-                     inner join authors a
-                         on b.author_id = a.id
-                     where b.id = :id
-                    """, Map.of("id", id), new BookRowMapper());
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        List<Book> books = namedParameterJdbcOperations.query("""
+                select b.id, b.title, b.author_id, b.genre_id,
+                        g.id, g.name,
+                        a.id, a.full_name
+                 from books b 
+                 inner join genres g 
+                     on b.genre_id = g.id
+                 inner join authors a
+                     on b.author_id = a.id
+                 where b.id = :id
+                """, Map.of("id", id), new BookRowMapper());
+
+        if (books.size() == 1) {
+            return Optional.of(books.getFirst());
         }
 
-        return Optional.ofNullable(book);
+        return Optional.empty();
     }
 
     @Override
     public List<Book> findAll() {
         return namedParameterJdbcOperations.getJdbcOperations().query(
                 """
-                    select b.id, b.title, b.author_id, b.genre_id,
-                            g.id, g.name,
-                            a.id, a.full_name
-                     from books b 
-                     inner join genres g 
-                         on b.genre_id = g.id
-                     inner join authors a
-                         on b.author_id = a.id
-                    """, new BookRowMapper());
+                        select b.id, b.title, b.author_id, b.genre_id,
+                                g.id, g.name,
+                                a.id, a.full_name
+                         from books b 
+                         inner join genres g 
+                             on b.genre_id = g.id
+                         inner join authors a
+                             on b.author_id = a.id
+                        """, new BookRowMapper());
     }
 
     @Override
@@ -88,7 +87,7 @@ public class JdbcBookRepository implements BookRepository {
         namedParameterJdbcOperations.update("""
                 insert into books (title, author_id, genre_id)
                 values (:title, :author_id, :genre_id)
-                """, parameterSource, keyHolder, new String[] {"id"});
+                """, parameterSource, keyHolder, new String[]{"id"});
 
         //noinspection DataFlowIssue
         book.setId(keyHolder.getKeyAs(Long.class));
