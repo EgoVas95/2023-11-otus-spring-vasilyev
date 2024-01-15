@@ -32,7 +32,7 @@ public class JdbcAuthorRepository implements AuthorRepository {
                 .query("select id, full_name from authors where id = :id",
                         Map.of("id", id), new AuthorRowMapper());
         if (authors.size() == 1) {
-            return Optional.of(authors.getFirst());
+            return Optional.of(authors.get(0));
         }
         return Optional.empty();
     }

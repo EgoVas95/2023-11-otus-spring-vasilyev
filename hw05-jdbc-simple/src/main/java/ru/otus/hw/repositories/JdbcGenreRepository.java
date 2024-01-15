@@ -32,7 +32,7 @@ public class JdbcGenreRepository implements GenreRepository {
                 "select id, name from genres where id = :id",
                 Map.of("id", id), new GenreRowMapper());
         if (genres.size() == 1) {
-            return Optional.of(genres.getFirst());
+            return Optional.of(genres.get(0));
         }
         return Optional.empty();
     }

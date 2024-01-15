@@ -40,7 +40,7 @@ public class JdbcBookRepository implements BookRepository {
                 """, Map.of("id", id), new BookRowMapper());
 
         if (books.size() == 1) {
-            return Optional.of(books.getFirst());
+            return Optional.of(books.get(0));
         }
 
         return Optional.empty();
