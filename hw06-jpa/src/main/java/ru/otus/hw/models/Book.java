@@ -10,7 +10,6 @@ import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.NamedAttributeNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
