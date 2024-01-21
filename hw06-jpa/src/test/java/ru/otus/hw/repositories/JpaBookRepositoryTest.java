@@ -59,15 +59,17 @@ class JpaBookRepositoryTest {
     void shouldSaveNewBook() {
         val author = em.find(Author.class, FIRST_AUTHOR_ID);
         val genre = em.find(Genre.class, FIRST_GENRE_ID);
-        val insertBook = new Book(0, "BookTitle_10500", author, genre);
+        val addedBook = new Book(0L, "BookTitle_10500", author, genre);
+        em.merge(addedBook);
 
-        bookRepositoryJpa.save(insertBook);
-        assertThat(insertBook.getId()).isGreaterThan(0);
+        bookRepositoryJpa.save(addedBook);
+        em.detach(addedBook);
+        assertThat(addedBook.getId()).isGreaterThan(0);
 
-        val findBook = em.find(Book.class, insertBook.getId());
+        val findBook = em.find(Book.class, addedBook.getId());
         assertThat(findBook)
                 .usingRecursiveComparison()
-                .isEqualTo(insertBook);
+                .isEqualTo(addedBook);
     }
 
     @DisplayName("должен сохранять измененную книгу")
@@ -106,19 +108,21 @@ class JpaBookRepositoryTest {
 
     private static List<Author> getDbAuthors() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Author(id, "Author_" + id))
+                .map(id -> new Author(Long.valueOf(id), "Author_" + id))
                 .toList();
     }
 
     private static List<Genre> getDbGenres() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Genre(id, "Genre_" + id))
+                .map(id -> new Genre(Long.valueOf(id), "Genre_" + id))
                 .toList();
     }
 
     private static List<Book> getDbBooks(List<Author> dbAuthors, List<Genre> dbGenres) {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Book(id, "BookTitle_" + id, dbAuthors.get(id - 1), dbGenres.get(id - 1)))
+                .map(id -> new Book(Long.valueOf(id),
+                        "BookTitle_" + id, dbAuthors.get(id - 1),
+                        dbGenres.get(id - 1)))
                 .toList();
     }
 

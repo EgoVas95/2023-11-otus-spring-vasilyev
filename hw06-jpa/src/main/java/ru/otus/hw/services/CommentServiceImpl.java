@@ -33,17 +33,22 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public Comment insert(String text, long bookId) {
-        return save(0, text, bookId);
+    public Comment create(String text, long bookId) {
+        var book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Book with id %d not found".formatted(bookId)));
+        var comment = new Comment(0L, text, book);
+        return commentRepository.save(comment);
     }
 
     @Transactional
     @Override
     public Comment update(long id, String text, long bookId) {
-        return save(id, text, bookId);
-    }
+        if (commentRepository.findById(id).isEmpty()) {
+            throw new EntityNotFoundException(
+                    "Не удалось найти комментарий с id = %d".formatted(id));
+        }
 
-    private Comment save(long id, String text, long bookId) {
         var book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Book with id %d not found".formatted(bookId)));

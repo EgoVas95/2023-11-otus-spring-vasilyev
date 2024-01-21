@@ -37,11 +37,13 @@ public class JpaCommentRepositoryTest {
     void shouldAddNewComment() {
         Book firstBook = em.find(Book.class, BOOK_FIRST_ID);
 
-        Comment insertComment = commentRepositoryJpa.save(
-                new Comment(0, NEW_COMMENT_TEXT, firstBook));
-        Comment findComment = em.find(Comment.class, insertComment.getId());
+        Comment addedComment = new Comment(0L, NEW_COMMENT_TEXT, firstBook);
+        em.merge(addedComment);
+        commentRepositoryJpa.save(addedComment);
+        em.detach(addedComment);
+        Comment findComment = em.find(Comment.class, addedComment.getId());
 
-        assertThat(insertComment).usingRecursiveComparison().isEqualTo(findComment);
+        assertThat(addedComment).usingRecursiveComparison().isEqualTo(findComment);
     }
 
     @DisplayName("должен изменить данные комментария")
@@ -84,7 +86,7 @@ public class JpaCommentRepositoryTest {
     private List<Comment> getCommentsForFirstBook() {
         Book book = em.find(Book.class, 1);
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Comment(id, "Book_%d_Comment_%d".formatted(BOOK_FIRST_ID, id),
+                .map(id -> new Comment(Long.valueOf(id), "Book_%d_Comment_%d".formatted(BOOK_FIRST_ID, id),
                         book))
                 .toList();
     }

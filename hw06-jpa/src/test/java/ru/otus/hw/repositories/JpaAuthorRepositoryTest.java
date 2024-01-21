@@ -39,7 +39,7 @@ class JpaAuthorRepositoryTest {
 
     private List<Author> getAuthorDb() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Author(id, "Author_%d".formatted(id)))
+                .map(id -> new Author(Long.valueOf(id), "Author_%d".formatted(id)))
                 .toList();
     }
 

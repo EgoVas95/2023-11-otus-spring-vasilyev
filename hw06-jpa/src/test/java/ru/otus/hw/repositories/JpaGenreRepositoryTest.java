@@ -39,7 +39,7 @@ class JpaGenreRepositoryTest {
 
     private List<Genre> getGenreDb() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Genre(id, "Genre_%d".formatted(id)))
+                .map(id -> new Genre(Long.valueOf(id), "Genre_%d".formatted(id)))
                 .toList();
     }
 
