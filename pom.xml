@@ -128,6 +128,7 @@
         <module>hw03-spring-boot</module>
         <module>hw04-spring-shell</module>
         <module>hw05-jdbc-simple</module>
+        <module>hw07-spring_data_jpa</module>
     </modules>
 
 </project>
