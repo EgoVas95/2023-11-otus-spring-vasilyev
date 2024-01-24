@@ -3,12 +3,9 @@ package ru.otus.hw.repositories;
 import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Genre;
@@ -34,13 +31,15 @@ class BookRepositoryTest {
 
 
     @DisplayName("должен загружать книгу по id")
-    @ParameterizedTest
-    @MethodSource("getDbBooks")
-    void shouldReturnCorrectBookById(Book expectedBook) {
-        var actualBook = bookRepository.findById(expectedBook.getId());
-        assertThat(actualBook).isPresent()
-                .get()
-                .isEqualTo(expectedBook);
+    @Test
+    void shouldReturnCorrectBookById() {
+        var expectedBooks = getDbBooks();
+        for(Book expectedBook : expectedBooks) {
+            var actualBook = bookRepository.findById(expectedBook.getId());
+            assertThat(actualBook).isPresent()
+                    .get()
+                    .isEqualTo(expectedBook);
+        }
     }
 
     @DisplayName("должен сохранять новую книгу")
@@ -85,29 +84,9 @@ class BookRepositoryTest {
                 .isEqualTo(returnedBook);
     }
 
-    private static List<Author> getDbAuthors() {
+    private List<Book> getDbBooks() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Author(Long.valueOf(id), "Author_" + id))
+                .map(id -> em.find(Book.class, id))
                 .toList();
-    }
-
-    private static List<Genre> getDbGenres() {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Genre(Long.valueOf(id), "Genre_" + id))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks(List<Author> dbAuthors, List<Genre> dbGenres) {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Book(Long.valueOf(id),
-                        "BookTitle_" + id, dbAuthors.get(id - 1),
-                        dbGenres.get(id - 1)))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks() {
-        var dbAuthors = getDbAuthors();
-        var dbGenres = getDbGenres();
-        return getDbBooks(dbAuthors, dbGenres);
     }
 }

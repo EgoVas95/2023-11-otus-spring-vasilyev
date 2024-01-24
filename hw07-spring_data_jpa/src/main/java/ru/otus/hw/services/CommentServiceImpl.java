@@ -44,10 +44,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public Comment update(long id, String text, long bookId) {
-        if (commentRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException(
-                    "Не удалось найти комментарий с id = %d".formatted(id));
-        }
+        commentRepository.findById(id).orElseThrow();
 
         var book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException(
