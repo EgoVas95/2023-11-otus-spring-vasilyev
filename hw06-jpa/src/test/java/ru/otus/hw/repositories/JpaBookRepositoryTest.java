@@ -35,13 +35,14 @@ class JpaBookRepositoryTest {
 
 
     @DisplayName("должен загружать книгу по id")
-    @ParameterizedTest
-    @MethodSource("getDbBooks")
-    void shouldReturnCorrectBookById(Book expectedBook) {
-        var actualBook = bookRepositoryJpa.findById(expectedBook.getId());
-        assertThat(actualBook).isPresent()
-                .get()
-                .isEqualTo(expectedBook);
+    void shouldReturnCorrectBookById() {
+        var expectedBooks = getDbBooks();
+        for(Book expectedBook : expectedBooks) {
+            var actualBook = bookRepositoryJpa.findById(expectedBook.getId());
+            assertThat(actualBook).isPresent()
+                    .get()
+                    .isEqualTo(expectedBook);
+        }
     }
 
     @DisplayName("должен загружать список всех книг")
@@ -106,29 +107,10 @@ class JpaBookRepositoryTest {
         assertThat(notFindedBook).isNull();
     }
 
-    private static List<Author> getDbAuthors() {
+    private List<Book> getDbBooks() {
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Author(Long.valueOf(id), "Author_" + id))
+                .map(id -> em.find(Book.class, id))
                 .toList();
     }
 
-    private static List<Genre> getDbGenres() {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Genre(Long.valueOf(id), "Genre_" + id))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks(List<Author> dbAuthors, List<Genre> dbGenres) {
-        return IntStream.range(1, 4).boxed()
-                .map(id -> new Book(Long.valueOf(id),
-                        "BookTitle_" + id, dbAuthors.get(id - 1),
-                        dbGenres.get(id - 1)))
-                .toList();
-    }
-
-    private static List<Book> getDbBooks() {
-        var dbAuthors = getDbAuthors();
-        var dbGenres = getDbGenres();
-        return getDbBooks(dbAuthors, dbGenres);
-    }
 }

@@ -52,10 +52,7 @@ public class BookServiceImpl implements BookService {
     }
 
     private Book save(long id, String title, long authorId, long genreId) {
-        if (id != 0 && bookRepository.findById(id).isEmpty()) {
-            throw new EntityNotFoundException(
-                    "Не удалось найти книгу с id = %d".formatted(id));
-        }
+        bookRepository.findById(id).orElseThrow();
 
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Author with id %d not found".formatted(authorId)));

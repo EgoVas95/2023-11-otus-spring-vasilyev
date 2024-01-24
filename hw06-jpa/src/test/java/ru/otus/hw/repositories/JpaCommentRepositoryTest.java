@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -29,6 +30,7 @@ public class JpaCommentRepositoryTest {
 
     private static final long BOOK_FIRST_ID = 1L;
     private static final long BOOK_SECOND_ID = 2L;
+
 
     private static final String NEW_COMMENT_TEXT = "Test comment";
 
@@ -84,10 +86,8 @@ public class JpaCommentRepositoryTest {
     }
 
     private List<Comment> getCommentsForFirstBook() {
-        Book book = em.find(Book.class, 1);
         return IntStream.range(1, 4).boxed()
-                .map(id -> new Comment(Long.valueOf(id), "Book_%d_Comment_%d".formatted(BOOK_FIRST_ID, id),
-                        book))
+                .map(id -> em.find(Comment.class, id))
                 .toList();
     }
 }
