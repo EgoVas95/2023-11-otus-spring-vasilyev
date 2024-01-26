@@ -35,6 +35,7 @@ class JpaBookRepositoryTest {
 
 
     @DisplayName("должен загружать книгу по id")
+    @Test
     void shouldReturnCorrectBookById() {
         var expectedBooks = getDbBooks();
         for(Book expectedBook : expectedBooks) {
