@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.0</version>
+        <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -93,6 +93,11 @@
             <version>${junit.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -128,6 +133,7 @@
         <module>hw03-spring-boot</module>
         <module>hw04-spring-shell</module>
         <module>hw05-jdbc-simple</module>
+        <module>hw06-jpa</module>
         <module>hw07-spring_data_jpa</module>
     </modules>
 
