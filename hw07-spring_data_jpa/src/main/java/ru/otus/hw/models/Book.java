@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.FetchType;
 
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @Entity
 @Table(name = "books")
+@NamedEntityGraph(name = "book-entity-graph")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

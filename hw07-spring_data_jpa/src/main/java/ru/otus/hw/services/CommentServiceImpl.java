@@ -21,41 +21,40 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Comment> findById(long id) {
+    public Optional<Comment> findById(Long id) {
         return commentRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findAllForBook(long bookId) {
+    public List<Comment> findAllForBook(Long bookId) {
         return commentRepository.findAllByBookId(bookId);
     }
 
     @Transactional
     @Override
-    public Comment create(String text, long bookId) {
+    public Comment create(String text, Long bookId) {
         var book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Book with id %d not found".formatted(bookId)));
-        var comment = new Comment(0L, text, book);
+        var comment = new Comment(null, text, book);
         return commentRepository.save(comment);
     }
 
     @Transactional
     @Override
-    public Comment update(long id, String text, long bookId) {
-        commentRepository.findById(id).orElseThrow();
+    public Comment update(Long id, String text) {
+        Comment currentComment = commentRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException(
+                        "Comment with id %d not found".formatted(id)));
 
-        var book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Book with id %d not found".formatted(bookId)));
-        var comment = new Comment(id, text, book);
-        return commentRepository.save(comment);
+        currentComment.setText(text);
+        return commentRepository.save(currentComment);
     }
 
     @Transactional
     @Override
-    public void deleteById(long id) {
+    public void deleteById(Long id) {
         commentRepository.deleteById(id);
     }
 }
