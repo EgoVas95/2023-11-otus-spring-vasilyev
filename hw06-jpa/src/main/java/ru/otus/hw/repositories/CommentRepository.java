@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository {
-    Optional<Comment> findById(long id);
+    Optional<Comment> findById(Long id);
 
-    List<Comment> findAllForBook(long bookId);
+    List<Comment> findAllForBook(Long bookId);
 
     Comment save(Comment comment);
 
-    void deleteById(long id);
+    void deleteById(Long id);
 }

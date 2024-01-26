@@ -22,12 +22,12 @@ public class JpaCommentRepository implements CommentRepository {
     }
 
     @Override
-    public Optional<Comment> findById(long id) {
+    public Optional<Comment> findById(Long id) {
         return Optional.ofNullable(em.find(Comment.class, id));
     }
 
     @Override
-    public List<Comment> findAllForBook(long bookId) {
+    public List<Comment> findAllForBook(Long bookId) {
         TypedQuery<Comment> query = em.createQuery(
                 "select c " +
                         "from Comment c " +
@@ -47,7 +47,10 @@ public class JpaCommentRepository implements CommentRepository {
     }
 
     @Override
-    public void deleteById(long id) {
-        em.remove(em.find(Comment.class, id));
+    public void deleteById(Long id) {
+        Comment comment = em.find(Comment.class, id);
+        if (comment != null) {
+            em.remove(comment);
+        }
     }
 }

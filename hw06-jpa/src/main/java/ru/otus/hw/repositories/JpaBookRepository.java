@@ -1,13 +1,16 @@
 package ru.otus.hw.repositories;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import jakarta.persistence.EntityGraph;
 import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.FETCH;
 
 @Repository
 public class JpaBookRepository implements BookRepository {
@@ -20,14 +23,24 @@ public class JpaBookRepository implements BookRepository {
     }
 
     @Override
-    public Optional<Book> findById(long id) {
-        return Optional.ofNullable(em.find(Book.class, id));
+    public Optional<Book> findById(Long id) {
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-graph");
+        TypedQuery<Book> query = em.createQuery("select b from Book b where id = :id",
+                Book.class);
+        query.setParameter("id", id);
+        query.setHint(FETCH.getKey(), entityGraph);
+
+        return Optional.ofNullable(query.getSingleResult());
     }
 
     @Override
     public List<Book> findAll() {
+        EntityGraph<?> entityGraph = em.getEntityGraph("book-graph");
+
         TypedQuery<Book> query = em.createQuery(
                 "select b from Book b", Book.class);
+        query.setHint(FETCH.getKey(), entityGraph);
+
         return query.getResultList();
     }
 
@@ -41,7 +54,10 @@ public class JpaBookRepository implements BookRepository {
     }
 
     @Override
-    public void deleteById(long id) {
-        em.remove(em.find(Book.class, id));
+    public void deleteById(Long id) {
+        Book book = em.find(Book.class, id);
+        if (book != null) {
+            em.remove(book);
+        }
     }
 }
