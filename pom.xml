@@ -135,6 +135,7 @@
         <module>hw05-jdbc-simple</module>
         <module>hw06-jpa</module>
         <module>hw07-spring_data_jpa</module>
+        <module>hw08-mongodb</module>
     </modules>
 
 </project>
