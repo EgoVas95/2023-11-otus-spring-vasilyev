@@ -23,7 +23,6 @@
             https://raw.githubusercontent.com/OtusTeam/Spring/master/checkstyle.xml
         </checkstyle.config.url>
         <mongock.version>4.3.8</mongock.version>
-        <flapdoodle.version>4.6.1</flapdoodle.version>
     </properties>
 
     <dependencies>

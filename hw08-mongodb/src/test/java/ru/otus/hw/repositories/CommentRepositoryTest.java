@@ -1,29 +1,20 @@
 package ru.otus.hw.repositories;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Репозиторий на основе JPA для работы с комментариями")
-@DataJpaTest
+@DataMongoTest
 public class CommentRepositoryTest {
-    @Autowired
-    private CommentRepository commentRepository;
-
-    @Autowired
-    private TestEntityManager em;
-
     private static final String FIRST_COMMENT_ID = "1";
 
     private static final String BOOK_FIRST_ID = "1";
@@ -31,33 +22,49 @@ public class CommentRepositoryTest {
 
     private static final String NEW_COMMENT_TEXT = "Test comment";
 
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @BeforeEach
+    public void initialize() {
+        Book firstBook = new Book(BOOK_FIRST_ID, "Book 1", null, null);
+        mongoTemplate.save(firstBook);
+        Book secondBook = new Book(BOOK_SECOND_ID, "Book 2", null, null);
+        mongoTemplate.save(secondBook);
+
+        mongoTemplate.save(new Comment(FIRST_COMMENT_ID, "1", firstBook));
+    }
+
+
     @DisplayName("должен добавить новый комментарий к книге с id = 1")
     @Test
     void shouldAddNewComment() {
-        Book firstBook = em.find(Book.class, BOOK_FIRST_ID);
+        Book firstBook = mongoTemplate.findById(BOOK_FIRST_ID, Book.class);
 
         Comment addedComment = new Comment(null, NEW_COMMENT_TEXT, firstBook);
-        em.merge(addedComment);
         commentRepository.save(addedComment);
-        em.detach(addedComment);
-        Comment findComment = em.find(Comment.class, addedComment.getId());
+        Comment findComment = mongoTemplate.findById(addedComment.getId(), Comment.class);
 
-        assertThat(addedComment).usingRecursiveComparison().isEqualTo(findComment);
+        assertThat(addedComment)
+                .usingRecursiveComparison()
+                .isEqualTo(findComment);
     }
 
     @DisplayName("должен изменить данные комментария")
     @Test
     void shouldChangeComment() {
-        Book secondBook = em.find(Book.class, BOOK_SECOND_ID);
-
-        var previousComment = em.find(Comment.class, FIRST_COMMENT_ID);
-        em.detach(previousComment);
+        Book secondBook = mongoTemplate.findById(BOOK_SECOND_ID, Book.class);
+        var previousComment = mongoTemplate.findById(FIRST_COMMENT_ID, Comment.class);
 
         var updatedComment = commentRepository.save(
                 new Comment(FIRST_COMMENT_ID, NEW_COMMENT_TEXT, secondBook));
-        var findComment = em.find(Comment.class, FIRST_COMMENT_ID);
+        var findComment = mongoTemplate.findById(FIRST_COMMENT_ID, Comment.class);
 
-        assertThat(updatedComment).usingRecursiveComparison()
+        assertThat(updatedComment)
+                .usingRecursiveComparison()
                 .isNotEqualTo(previousComment)
                 .isEqualTo(findComment);
     }
@@ -66,9 +73,10 @@ public class CommentRepositoryTest {
     @Test
     void shouldFindExpectedCommentById() {
         val optionalActualComment = commentRepository.findById(FIRST_COMMENT_ID);
-        val expectedComment = em.find(Comment.class, FIRST_COMMENT_ID);
+        val expectedComment = mongoTemplate.findById(FIRST_COMMENT_ID, Comment.class);
 
         assertThat(optionalActualComment).isPresent().get()
-                .usingRecursiveComparison().isEqualTo(expectedComment);
+                .usingRecursiveComparison()
+                .isEqualTo(expectedComment);
     }
 }

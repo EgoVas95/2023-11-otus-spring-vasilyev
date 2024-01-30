@@ -3,6 +3,7 @@ package ru.otus.hw.commands;
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import ru.otus.hw.converters.AuthorConverter;
 import ru.otus.hw.converters.BookConverter;
 import ru.otus.hw.services.BookService;
 
@@ -16,6 +17,8 @@ public class BookCommands {
     private final BookService bookService;
 
     private final BookConverter bookConverter;
+
+    private final AuthorConverter authorConverter;
 
     @ShellMethod(value = "Find all books", key = "ab")
     public String findAllBooks() {
@@ -51,4 +54,10 @@ public class BookCommands {
         bookService.deleteById(id);
     }
 
+    @ShellMethod(value = "Find all authors", key = "aa")
+    public String findAllAuthors() {
+        return bookService.findAllAuthors().stream()
+                .map(authorConverter::authorToString)
+                .collect(Collectors.joining("," + System.lineSeparator()));
+    }
 }

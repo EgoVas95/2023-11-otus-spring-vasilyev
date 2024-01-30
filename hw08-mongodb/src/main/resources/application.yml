@@ -6,8 +6,7 @@ spring:
       host: localhost
 
 mongock:
-  #runner-type: "ApplicationRunner" # default
-  runner-type: "InitializingBean"
+  runner-type: initializingbean
   change-logs-scan-package:
     - ru.otus.hw.mongock.changelog
   mongo-db:

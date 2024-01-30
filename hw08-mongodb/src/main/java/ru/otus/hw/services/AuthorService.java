@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface AuthorService {
     List<Author> findAll();
+
+    void insertAuthor(String fullName);
 }

@@ -18,4 +18,10 @@ public class AuthorServiceImpl implements AuthorService {
     public List<Author> findAll() {
         return authorRepository.findAll();
     }
+
+    @Transactional
+    @Override
+    public void insertAuthor(String fullName) {
+        authorRepository.save(new Author(null, fullName));
+    }
 }
