@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -21,6 +20,5 @@ public class Book {
 
     private Author author;
 
-    @DBRef
     private Genre genre;
 }
