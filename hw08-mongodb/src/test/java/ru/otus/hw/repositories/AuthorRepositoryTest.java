@@ -11,7 +11,7 @@ import ru.otus.hw.models.Author;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Репозиторий на основе JPA для работы с авторами")
+@DisplayName("Репозиторий на основе MongoDB для работы с авторами")
 @DataMongoTest
 public class AuthorRepositoryTest {
     private static final String FIRST_AUTHOR_ID = "1";

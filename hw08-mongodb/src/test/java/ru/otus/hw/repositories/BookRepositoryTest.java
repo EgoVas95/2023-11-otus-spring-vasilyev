@@ -15,7 +15,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Репозиторий на основе JPA для работы с книгами ")
+@DisplayName("Репозиторий на основе MongoDB для работы с книгами ")
 @DataMongoTest
 class BookRepositoryTest {
 

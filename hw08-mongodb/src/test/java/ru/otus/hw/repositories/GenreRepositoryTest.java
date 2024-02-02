@@ -11,7 +11,7 @@ import ru.otus.hw.models.Genre;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DisplayName("Репозиторий на основе JPA для работы с комментариями ")
+@DisplayName("Репозиторий на основе MongoDB для работы с комментариями ")
 @DataMongoTest
 public class GenreRepositoryTest {
 
