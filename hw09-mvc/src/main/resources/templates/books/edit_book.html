@@ -29,7 +29,8 @@
 <body>
 
 <!-- Book edition -->
-<form id="edit-form" action="books/edit_book.html" th:action="@{/edit_book(id=${book.id})}"
+<form id="edit-form" action="books/edit_book.html"
+      th:action="${book.id == null} ? @{/create_book(id=${book.id})} : @{/update_book(id=${book.id})}"
       th:method="post" th:object="${book}">
     <h3>Book Info:</h3>
 

@@ -3,13 +3,15 @@ package ru.otus.hw.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.mappers.CommentMapper;
 import ru.otus.hw.models.Comment;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.CommentRepository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -21,35 +23,39 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<Comment> findById(Long id) {
-        return commentRepository.findById(id);
+    public CommentDto findById(Long id) {
+        return CommentMapper.fromDomainObject(commentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Comment with id = %d is not found")));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findAllForBook(Long bookId) {
-        return commentRepository.findAllByBookId(bookId);
+    public List<CommentDto> findAllForBook(Long bookId) {
+        return commentRepository.findAllByBookId(bookId).stream()
+                .map(CommentMapper::fromDomainObject)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
-    public Comment create(String text, Long bookId) {
+    public CommentDto create(String text, Long bookId) {
         var book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Book with id %d not found".formatted(bookId)));
         var comment = new Comment(null, text, book);
-        return commentRepository.save(comment);
+        return CommentMapper.fromDomainObject(commentRepository.save(comment));
     }
 
     @Transactional
     @Override
-    public Comment update(Long id, String text) {
+    public CommentDto update(Long id, String text) {
         Comment currentComment = commentRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException(
                         "Comment with id %d not found".formatted(id)));
 
         currentComment.setText(text);
-        return commentRepository.save(currentComment);
+        return CommentMapper.fromDomainObject(commentRepository.save(currentComment));
     }
 
     @Transactional

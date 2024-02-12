@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
+
+import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Book;
+import ru.otus.hw.dto.AuthorDto;
+import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.services.AuthorServiceImpl;
 import ru.otus.hw.services.BookServiceImpl;
 import ru.otus.hw.services.GenreServiceImpl;
@@ -29,28 +32,29 @@ public class BookController {
 
     @GetMapping("/")
     public String allBooksList(Model model) {
-        List<Book> books = bookService.findAll();
+        List<BookDto> books = bookService.findAll();
         model.addAttribute("books", books);
         return "books/all_books";
     }
 
     @GetMapping("/edit_book")
     public String editBook(@RequestParam(value = "id", required = false) Long id, Model model) {
-        Book book;
         if (id == null) {
-            book = new Book();
+            BookCreateDto book = new BookCreateDto(null, null,
+                    new AuthorDto(null, null),
+                    new GenreDto(null, null));
+            model.addAttribute("book", book);
         } else {
-            book = bookService.findById(id).orElseThrow(
-                    () -> new EntityNotFoundException("Not found book with id = %d".formatted(id)));
+            BookDto book = bookService.findById(id);
+            model.addAttribute("book", BookUpdateDto.fromBookDto(book));
         }
-        model.addAttribute("book", book);
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
         return "books/edit_book";
     }
 
-    @PostMapping("/edit_book")
-    public String saveBook(@Valid @ModelAttribute("book") BookDto book,
+    @PostMapping("/update_book")
+    public String updateBook(@Valid @ModelAttribute("book") BookUpdateDto book,
                            BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("book", book);
@@ -59,11 +63,22 @@ public class BookController {
             return "books/edit_book";
         }
 
-        if (book.getId() == null) {
-            bookService.create(book);
-        } else {
-            bookService.update(book);
+        bookService.update(book);
+        return "redirect:/";
+    }
+
+
+    @PostMapping("/create_book")
+    public String createBook(@Valid @ModelAttribute("book") BookCreateDto book,
+                           BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("book", book);
+            model.addAttribute("authors", authorService.findAll());
+            model.addAttribute("genres", genreService.findAll());
+            return "books/edit_book";
         }
+
+        bookService.create(book);
         return "redirect:/";
     }
 
