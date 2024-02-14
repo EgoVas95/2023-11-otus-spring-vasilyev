@@ -136,6 +136,7 @@
         <module>hw06-jpa</module>
         <module>hw07-spring_data_jpa</module>
         <module>hw08-mongodb</module>
+        <module>hw10-singlepage_back</module>
     </modules>
 
 </project>
