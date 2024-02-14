@@ -64,7 +64,6 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public BookDto update(BookUpdateDto bookDto) {
-        System.out.println(bookDto);
         final Long id = bookDto.getId();
         final Long authorId = bookDto.getAuthor().getId();
         final Long genreId = bookDto.getGenre().getId();
