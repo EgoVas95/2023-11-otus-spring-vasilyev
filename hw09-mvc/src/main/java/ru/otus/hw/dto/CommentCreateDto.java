@@ -12,9 +12,6 @@ public class CommentCreateDto {
     @NotBlank(message = "Book title can't be null")
     @Size(min = 1, max = 100, message = "Comment text should be with " +
             "size from 1 to 100 symbols")
-    private Long id;
-
-    @NotNull(message = "Book can't be null")
     private String text;
 
     @NotNull(message = "Book id can't be null")
