@@ -1,5 +1,6 @@
 package ru.otus.hw.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,8 +17,10 @@ public class BookCreateDto {
     private String title;
 
     @NotNull(message = "Book author can't be null")
+    @Valid
     private AuthorDto author;
 
     @NotNull(message = "Book genre can't be null")
+    @Valid
     private GenreDto genre;
 }

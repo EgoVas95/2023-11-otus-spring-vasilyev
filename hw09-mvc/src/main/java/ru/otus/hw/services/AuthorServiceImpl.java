@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 public class AuthorServiceImpl implements AuthorService {
     private final AuthorRepository authorRepository;
 
+    private final AuthorMapper authorMapper;
+
     @Transactional(readOnly = true)
     @Override
     public List<AuthorDto> findAll() {
         return authorRepository.findAll()
-                .stream().map(AuthorMapper::fromDomainObject)
+                .stream().map(authorMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

@@ -60,7 +60,7 @@ public class BookController {
             model.addAttribute("book", book);
             model.addAttribute("authors", authorService.findAll());
             model.addAttribute("genres", genreService.findAll());
-            return "books/edit_book";
+            return "redirect:/edit_book";
         }
 
         bookService.update(book);

@@ -17,6 +17,7 @@ import java.util.List;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -43,15 +44,12 @@ class BookControllerTest {
     @DisplayName("Должен добавить новую книгу")
     @Test
     void shouldAddNewBook() throws Exception {
-        given(authorService.findAll()).willReturn(List.of(new AuthorDto(1L, "A")));
-        given(genreService.findAll()).willReturn(List.of(new GenreDto(1L, "G")));
+        BookDto book = getExampleOfBookDto();
+        BookCreateDto bookCreateDto = new BookCreateDto(book.getId(),
+                book.getTitle(), book.getAuthor(), book.getGenre());
 
-        BookCreateDto bookDto = new BookCreateDto(null, "a",
-                authorService.findAll().get(0),
-                genreService.findAll().get(0));
-
-        mvc.perform(post("/create_book").flashAttr("book", bookDto))
-                .andExpect(status().is3xxRedirection());
+        mvc.perform(post("/create_book").flashAttr("book", bookCreateDto))
+                .andExpect(redirectedUrl("/"));
     }
 
     @DisplayName("Должен вернуть правильную книгу")
@@ -74,32 +72,89 @@ class BookControllerTest {
                 .willThrow(new EntityNotFoundException(null));
 
         mvc.perform(get("/edit_book").param("id", String.valueOf(NOT_CONTAIN_BOOK_ID)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @DisplayName("Должен обновить старую книгу")
     @Test
     void shouldUpdateBook() throws Exception {
-        given(authorService.findAll()).willReturn(List.of(new AuthorDto(1L, "A")));
-        given(genreService.findAll()).willReturn(List.of(new GenreDto(1L, "G")));
-
-        BookDto book = new BookDto(FIRST_BOOK_ID, "a",
-                authorService.findAll().get(0),
-                genreService.findAll().get(0));
-        given(bookService.findById(FIRST_BOOK_ID)).willReturn(book);
+        BookDto book = getExampleOfBookDto();
+        given(bookService.findById(book.getId())).willReturn(book);
 
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
                 book.getAuthor(), book.getGenre());
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(redirectedUrl("/"));
     }
 
+    @DisplayName("Not found exception при попытке обновить книгу")
+    @Test
+    void notFoundExceptionByUpdate() throws Exception {
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(null, null,
+                null, null);
+
+        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
+                .andExpect(redirectedUrl("/edit_book"));
+    }
+
+    @DisplayName("Ошибка валидации id автора при создании книги")
+    @Test
+    void exceptionByCreateWithNonValidIdAuthor() throws Exception {
+        BookDto book = getExampleOfBookDto();
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                new AuthorDto(null, "a"), book.getGenre());
+
+        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
+                .andExpectAll(redirectedUrl("/edit_book"));
+    }
+
+    @DisplayName("Ошибка валидации fullName автора при создании книги")
+    @Test
+    void exceptionByCreateWithNonValidFullNameAuthor() throws Exception {
+        BookDto book = getExampleOfBookDto();
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                new AuthorDto(1L, null), book.getGenre());
+
+        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
+                .andExpectAll(redirectedUrl("/edit_book"));
+    }
+
+    @DisplayName("Ошибка валидации id жанра при создании книги")
+    @Test
+    void exceptionByCreateWithNonValidIGenre() throws Exception {
+        BookDto book = getExampleOfBookDto();
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                book.getAuthor(), new GenreDto(null, "1"));
+
+        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
+                .andExpectAll(redirectedUrl("/edit_book"));
+    }
+
+    @DisplayName("Ошибка валидации name жанра при создании книги")
+    @Test
+    void exceptionByCreateWithNonValidNameGenre() throws Exception {
+        BookDto book = getExampleOfBookDto();
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                book.getAuthor(), new GenreDto(1L, null));
+
+        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
+                .andExpectAll(redirectedUrl("/edit_book"));
+    }
 
     @DisplayName("Должен удалить книгу")
     @Test
     void shouldDeleteBook() throws Exception {
         mvc.perform(post("/delete").param("id", String.valueOf(FIRST_BOOK_ID)))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(redirectedUrl("/"));
+    }
+
+    private BookDto getExampleOfBookDto() {
+        given(authorService.findAll()).willReturn(List.of(new AuthorDto(1L, "A")));
+        given(genreService.findAll()).willReturn(List.of(new GenreDto(1L, "G")));
+
+        return new BookDto(FIRST_BOOK_ID, "a",
+                authorService.findAll().get(0),
+                genreService.findAll().get(0));
     }
 }

@@ -3,13 +3,20 @@ package ru.otus.hw.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-public class CommentUpdateDto extends CommentDto {
-    public CommentUpdateDto(@NotNull Long id,
-                            @NotBlank(message = "Book title can't be null")
-                            @Size(min = 1, max = 100, message = "Comment text should be with " +
-                                    "size from 1 to 100 symbols") String text,
-                            @NotNull(message = "Book can't be null") Long bookId) {
-        super(id, text, bookId);
-    }
+@Data
+@AllArgsConstructor
+public class CommentUpdateDto {
+    @NotNull
+    private Long id;
+
+    @NotBlank(message = "Book title can't be null")
+    @Size(min = 1, max = 100, message = "Comment text should be with " +
+            "size from 1 to 100 symbols")
+    private String text;
+
+    @NotNull(message = "Book id can't be null")
+    private Long bookId;
 }

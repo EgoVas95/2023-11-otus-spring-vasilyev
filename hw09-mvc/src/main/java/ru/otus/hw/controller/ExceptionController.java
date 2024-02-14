@@ -9,6 +9,6 @@ import ru.otus.hw.exceptions.EntityNotFoundException;
 public class ExceptionController {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundEx(EntityNotFoundException ex) {
-        return ResponseEntity.badRequest().body(ex.getLocalizedMessage());
+        return ResponseEntity.notFound().build();
     }
 }

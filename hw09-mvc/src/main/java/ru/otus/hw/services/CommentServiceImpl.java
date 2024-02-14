@@ -21,10 +21,12 @@ public class CommentServiceImpl implements CommentService {
 
     private final BookRepository bookRepository;
 
+    private final CommentMapper commentMapper;
+
     @Transactional(readOnly = true)
     @Override
     public CommentDto findById(Long id) {
-        return CommentMapper.fromDomainObject(commentRepository.findById(id)
+        return commentMapper.toDto(commentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Comment with id = %d is not found")));
     }
@@ -33,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDto> findAllForBook(Long bookId) {
         return commentRepository.findAllByBookId(bookId).stream()
-                .map(CommentMapper::fromDomainObject)
+                .map(commentMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -44,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Book with id %d not found".formatted(bookId)));
         var comment = new Comment(null, text, book);
-        return CommentMapper.fromDomainObject(commentRepository.save(comment));
+        return commentMapper.toDto(commentRepository.save(comment));
     }
 
     @Transactional
@@ -55,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
                         "Comment with id %d not found".formatted(id)));
 
         currentComment.setText(text);
-        return CommentMapper.fromDomainObject(commentRepository.save(currentComment));
+        return commentMapper.toDto(commentRepository.save(currentComment));
     }
 
     @Transactional

@@ -25,10 +25,12 @@ public class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
 
+    private final BookMapper bookMapper;
+
     @Transactional(readOnly = true)
     @Override
     public BookDto findById(Long id) {
-        return BookMapper.fromDomainObject(bookRepository.findById(id).orElseThrow(() ->
+        return bookMapper.toDto(bookRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Book with id = %d is not found"
                         .formatted(id))));
     }
@@ -37,7 +39,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDto> findAll() {
         return bookRepository.findAll()
-                .stream().map(BookMapper::fromDomainObject)
+                .stream().map(bookMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -53,15 +55,16 @@ public class BookServiceImpl implements BookService {
         var genre = genreRepository.findById(genreId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Genre with id %d not found".formatted(genreId)));
-        var book = BookMapper.toDomainObject(bookDto);
+        var book = bookMapper.toModel(bookDto);
         book.setAuthor(author);
         book.setGenre(genre);
-        return BookMapper.fromDomainObject(bookRepository.save(book));
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
     @Transactional
     @Override
     public BookDto update(BookUpdateDto bookDto) {
+        System.out.println(bookDto);
         final Long id = bookDto.getId();
         final Long authorId = bookDto.getAuthor().getId();
         final Long genreId = bookDto.getGenre().getId();
@@ -75,11 +78,11 @@ public class BookServiceImpl implements BookService {
         var genre = genreRepository.findById(genreId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Genre with id %d not found".formatted(genreId)));
-        var book = BookMapper.toDomainObject(bookDto);
+        var book = bookMapper.toModel(bookDto);
         book.setAuthor(author);
         book.setGenre(genre);
 
-        return BookMapper.fromDomainObject(bookRepository.save(book));
+        return bookMapper.toDto(bookRepository.save(book));
     }
 
     @Transactional
