@@ -26,9 +26,4 @@ public class BookUpdateDto {
     @NotNull(message = "Book genre can't be null")
     @Valid
     private GenreDto genre;
-
-    public static BookUpdateDto fromBookDto(BookDto bookDto) {
-        return new BookUpdateDto(bookDto.getId(), bookDto.getTitle(),
-                bookDto.getAuthor(), bookDto.getGenre());
-    }
 }
