@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.dto.BookDto;
@@ -40,14 +41,13 @@ public class BookController {
     @GetMapping("/edit_book")
     public String editBook(@RequestParam(value = "id", required = false) Long id, Model model) {
         if (id == null) {
-            BookCreateDto book = new BookCreateDto(null, null,
-                    new AuthorDto(null, null),
-                    new GenreDto(null, null));
+            BookCreateDto book = new BookCreateDto(null, null, null, null);
             model.addAttribute("book", book);
         } else {
             BookDto book = bookService.findById(id);
             model.addAttribute("book", BookUpdateDto.fromBookDto(book));
         }
+
         model.addAttribute("authors", authorService.findAll());
         model.addAttribute("genres", genreService.findAll());
         return "books/edit_book";
@@ -55,12 +55,9 @@ public class BookController {
 
     @PostMapping("/update_book")
     public String updateBook(@Valid @ModelAttribute("book") BookUpdateDto book,
-                           BindingResult bindingResult, Model model) {
+                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("book", book);
-            model.addAttribute("authors", authorService.findAll());
-            model.addAttribute("genres", genreService.findAll());
-            return "redirect:/edit_book";
+            return "redirect:/edit_book?id=%d".formatted(book.getId());
         }
 
         bookService.update(book);
@@ -70,12 +67,9 @@ public class BookController {
 
     @PostMapping("/create_book")
     public String createBook(@Valid @ModelAttribute("book") BookCreateDto book,
-                           BindingResult bindingResult, Model model) {
+                             BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("book", book);
-            model.addAttribute("authors", authorService.findAll());
-            model.addAttribute("genres", genreService.findAll());
-            return "books/edit_book";
+            return "redirect:/edit_book?id=%d".formatted(book.getId());
         }
 
         bookService.create(book);

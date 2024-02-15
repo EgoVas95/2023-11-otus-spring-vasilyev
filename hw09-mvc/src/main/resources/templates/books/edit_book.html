@@ -48,22 +48,22 @@
 
     <div class="row">
         <label for="author-select">Author:</label>
-        <select id="author-select" th:field="*{author.id}">
+        <select id="author-select" th:field="*{authorId}">
             <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.fullName}"
-                    th:selected="*{author.id}"/>
+                    th:selected="*{authorId}"/>
         </select>
-        <div class="errors" th:if="${#fields.hasErrors('author')}"
-             th:errors="*{author}">Wrong book author error</div>
+        <div class="errors" th:if="${#fields.hasErrors('authorId')}"
+             th:errors="*{authorId}">Wrong book author error</div>
     </div>
 
     <div class="row">
         <label for="genre-select">Genre:</label>
-        <select id="genre-select" th:field="*{genre.id}">
+        <select id="genre-select" th:field="*{genreId}">
             <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"
-                    th:selected="*{genre.id}"/>
+                    th:selected="*{genreId}"/>
         </select>
-        <div class="errors" th:if="${#fields.hasErrors('genre')}"
-             th:errors="*{genre}">Wrong book genre error</div>
+        <div class="errors" th:if="${#fields.hasErrors('genreId')}"
+             th:errors="*{genreId}">Wrong book genre error</div>
     </div>
 
     <div class="row">

@@ -15,6 +15,7 @@ import ru.otus.hw.services.GenreServiceImpl;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -45,8 +46,8 @@ class BookControllerTest {
     @Test
     void shouldAddNewBook() throws Exception {
         BookDto book = getExampleOfBookDto();
-        BookCreateDto bookCreateDto = new BookCreateDto(book.getId(),
-                book.getTitle(), book.getAuthor(), book.getGenre());
+        BookCreateDto bookCreateDto = new BookCreateDto(null, book.getTitle(), book.getAuthor().getId(),
+                book.getGenre().getId());
 
         mvc.perform(post("/create_book").flashAttr("book", bookCreateDto))
                 .andExpect(redirectedUrl("/"));
@@ -82,7 +83,7 @@ class BookControllerTest {
         given(bookService.findById(book.getId())).willReturn(book);
 
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                book.getAuthor(), book.getGenre());
+                book.getAuthor().getId(), book.getGenre().getId());
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
                 .andExpect(redirectedUrl("/"));
@@ -95,7 +96,7 @@ class BookControllerTest {
                 null, null);
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpect(redirectedUrl("/edit_book"));
+                .andExpect(redirectedUrl("/edit_book?id=%d".formatted(null)));
     }
 
     @DisplayName("Ошибка валидации id автора при создании книги")
@@ -103,21 +104,10 @@ class BookControllerTest {
     void exceptionByCreateWithNonValidIdAuthor() throws Exception {
         BookDto book = getExampleOfBookDto();
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                new AuthorDto(null, "a"), book.getGenre());
+                null, book.getGenre().getId());
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpectAll(redirectedUrl("/edit_book"));
-    }
-
-    @DisplayName("Ошибка валидации fullName автора при создании книги")
-    @Test
-    void exceptionByCreateWithNonValidFullNameAuthor() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                new AuthorDto(1L, null), book.getGenre());
-
-        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpectAll(redirectedUrl("/edit_book"));
+                .andExpect(redirectedUrl("/edit_book?id=%d".formatted(book.getId())));
     }
 
     @DisplayName("Ошибка валидации id жанра при создании книги")
@@ -125,21 +115,10 @@ class BookControllerTest {
     void exceptionByCreateWithNonValidIGenre() throws Exception {
         BookDto book = getExampleOfBookDto();
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                book.getAuthor(), new GenreDto(null, "1"));
+                book.getAuthor().getId(), null);
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpectAll(redirectedUrl("/edit_book"));
-    }
-
-    @DisplayName("Ошибка валидации name жанра при создании книги")
-    @Test
-    void exceptionByCreateWithNonValidNameGenre() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                book.getAuthor(), new GenreDto(1L, null));
-
-        mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpectAll(redirectedUrl("/edit_book"));
+                .andExpect(redirectedUrl("/edit_book?id=%d".formatted(book.getId())));
     }
 
     @DisplayName("Должен удалить книгу")
