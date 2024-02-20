@@ -89,7 +89,8 @@ class BookControllerTest {
                 .willReturn(bookDto);
 
         BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), bookDto.getAuthor(), bookDto.getGenre());
+                bookDto.getTitle(), bookDto.getAuthor().getId(),
+                bookDto.getGenre().getId());
 
         mvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,21 +104,7 @@ class BookControllerTest {
     void shouldExceptionAddNewBookWithInvalidAuthorId() throws Exception {
         BookDto bookDto = getExampleOfBookDto();
         BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), new AuthorDto(null, "aa"), bookDto.getGenre());
-
-        mvc.perform(post("/api/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isBadRequest());
-    }
-
-
-    @DisplayName("Должен выкинуть ошибку при добавлении невалидного автора fullname")
-    @Test
-    void shouldExceptionAddNewBookWithInvalidAuthorFullName() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), new AuthorDto(1L, null), bookDto.getGenre());
+                bookDto.getTitle(), null, bookDto.getGenre().getId());
 
         mvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,21 +117,7 @@ class BookControllerTest {
     void shouldExceptionAddNewBookWithInvalidGenreId() throws Exception {
         BookDto bookDto = getExampleOfBookDto();
         BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), bookDto.getAuthor(), new GenreDto(null, "qwe"));
-
-        mvc.perform(post("/api/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isBadRequest());
-    }
-
-
-    @DisplayName("Должен выкинуть ошибку при добавлении невалидного жанра name")
-    @Test
-    void shouldExceptionAddNewBookWithInvalidGenreName() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), bookDto.getAuthor(), new GenreDto(1L, null));
+                bookDto.getTitle(), bookDto.getAuthor().getId(), null);
 
         mvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -159,8 +132,10 @@ class BookControllerTest {
         given(bookService.update(any(), any()))
                 .willReturn(bookDto);
 
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getTitle(),
-                bookDto.getAuthor(), bookDto.getGenre());
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(),
+                bookDto.getTitle(),
+                bookDto.getAuthor().getId(),
+                bookDto.getGenre().getId());
 
         mvc.perform(patch("/api/books/%d".formatted(bookDto.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -176,8 +151,8 @@ class BookControllerTest {
                 .willThrow(EntityNotFoundException.class);
 
         BookDto bookDto = getExampleOfBookDto();
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getTitle(),
-                bookDto.getAuthor(), bookDto.getGenre());
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(), bookDto.getTitle(),
+                bookDto.getAuthor().getId(), bookDto.getGenre().getId());
         mvc.perform(patch("/api/books/%d".formatted(FIRST_BOOK_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(bookUpdateDto)))
@@ -191,23 +166,8 @@ class BookControllerTest {
         given(bookService.findById(book.getId()))
                 .willReturn(book);
 
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getTitle(),
-                new AuthorDto(null, "a"), book.getGenre());
-
-        mvc.perform(patch("/api/books/%d".formatted(book.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @DisplayName("Ошибка валидации fullName автора при создании книги")
-    @Test
-    void exceptionByCreateWithNonValidFullNameAuthor() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        given(bookService.findById(book.getId()))
-                .willReturn(book);
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getTitle(),
-                new AuthorDto(1L, null), book.getGenre());
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                null, book.getGenre().getId());
 
         mvc.perform(patch("/api/books/%d".formatted(book.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -221,24 +181,9 @@ class BookControllerTest {
         BookDto book = getExampleOfBookDto();
         given(bookService.findById(book.getId()))
                 .willReturn(book);
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getTitle(),
-                book.getAuthor(), new GenreDto(null, "1"));
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
+                book.getAuthor().getId(), null);
 
-
-        mvc.perform(patch("/api/books/%d".formatted(book.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @DisplayName("Ошибка валидации name жанра при создании книги")
-    @Test
-    void exceptionByCreateWithNonValidNameGenre() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        given(bookService.findById(book.getId()))
-                .willReturn(book);
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getTitle(),
-                book.getAuthor(), new GenreDto(1L, null));
 
         mvc.perform(patch("/api/books/%d".formatted(book.getId()))
                         .contentType(MediaType.APPLICATION_JSON)

@@ -9,6 +9,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CommentUpdateDto {
+    @NotNull
+    private Long id;
+
     @NotBlank(message = "Book title can't be null")
     @Size(min = 1, max = 100, message = "Comment text should be with " +
             "size from 1 to 100 symbols")

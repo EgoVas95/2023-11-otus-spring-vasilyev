@@ -5,7 +5,9 @@ import org.springframework.stereotype.Component;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
+import ru.otus.hw.models.Author;
 import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 
 @Component
 @AllArgsConstructor
@@ -21,16 +23,13 @@ public class BookMapper {
                 genreMapper.toModel(dto.getGenre()));
     }
 
-    public Book toModel(BookCreateDto dto) {
-        return new Book(null, dto.getTitle(),
-                authorMapper.toModel(dto.getAuthor()),
-                genreMapper.toModel(dto.getGenre()));
+    public Book toModel(BookCreateDto dto, Author author, Genre genre) {
+        return new Book(null, dto.getTitle(), author, genre);
     }
 
-    public Book toModel(Long id, BookUpdateDto dto) {
-        return new Book(id, dto.getTitle(),
-                authorMapper.toModel(dto.getAuthor()),
-                genreMapper.toModel(dto.getGenre()));
+    public Book toModel(BookUpdateDto dto, Author author, Genre genre) {
+        return new Book(dto.getId(), dto.getTitle(),
+                author, genre);
     }
 
     public BookDto toDto(Book book) {

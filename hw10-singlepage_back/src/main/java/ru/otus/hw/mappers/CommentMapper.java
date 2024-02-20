@@ -6,30 +6,26 @@ import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.CommentCreateDto;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentUpdateDto;
+import ru.otus.hw.models.Book;
 import ru.otus.hw.models.Comment;
 
 @Component
 @AllArgsConstructor
 public class CommentMapper {
 
-    private final BookMapper bookMapper;
-
-    public Comment toModel(CommentDto dto) {
+    public Comment toModel(CommentDto dto, Book book) {
         return new Comment(dto.getId(), dto.getText(),
-                bookMapper.toModel(new BookDto(
-                        dto.getBookId(), null, null, null)));
+                book);
     }
 
-    public Comment toModel(CommentCreateDto dto) {
+    public Comment toModel(CommentCreateDto dto, Book book) {
         return new Comment(null, dto.getText(),
-                bookMapper.toModel(new BookDto(
-                        dto.getBookId(), null, null, null)));
+                book);
     }
 
-    public Comment toModel(Long id, CommentUpdateDto dto) {
-        return new Comment(id, dto.getText(),
-                bookMapper.toModel(new BookDto(
-                        dto.getBookId(), null, null, null)));
+    public Comment toModel(CommentUpdateDto dto, Book book) {
+        return new Comment(dto.getId(), dto.getText(),
+                book);
     }
 
     public CommentDto toDto(Comment comment) {

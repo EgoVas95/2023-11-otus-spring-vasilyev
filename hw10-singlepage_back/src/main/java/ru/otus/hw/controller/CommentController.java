@@ -39,7 +39,7 @@ public class CommentController {
     @PatchMapping("/api/books/{id}/comments/{comment_id}")
     public CommentDto updateComment(@PathVariable("comment_id") Long commentId,
             @Valid @RequestBody CommentUpdateDto dto) {
-        return commentService.update(commentId, dto);
+        return commentService.update(dto);
     }
 
     @DeleteMapping("/api/books/{id}/comments/{comment_id}")

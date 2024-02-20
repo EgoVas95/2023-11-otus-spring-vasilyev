@@ -12,6 +12,9 @@ import ru.otus.hw.dto.CommentCreateDto;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.CommentServiceImpl;
 
 import java.util.List;
@@ -132,10 +135,10 @@ class CommentControllerTest {
     @Test
     void shouldUpdateBook() throws Exception {
         CommentDto dto = getExampleOfCommentDto();
-        given(commentService.update(any(), any()))
-                .willReturn(dto);
+        given(commentService.update(any())).willReturn(dto);
 
-        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getText(), dto.getBookId());
+        CommentUpdateDto updateDto = new CommentUpdateDto(FIRST_COMMENT_ID,
+                dto.getText(), dto.getBookId());
 
         mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -148,7 +151,7 @@ class CommentControllerTest {
     @Test
     void shouldThrowExUpdInvalidText() throws Exception {
         CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(null, dto.getBookId());
+        CommentUpdateDto updateDto = new CommentUpdateDto(null, dto.getText(), FIRST_BOOK_ID);
 
         mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -160,7 +163,7 @@ class CommentControllerTest {
     @Test
     void shouldThrowExUpdInvalidBookId() throws Exception {
         CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getText(), null);
+        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), null);
 
         mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -171,11 +174,10 @@ class CommentControllerTest {
     @DisplayName("Not found exception при попытке обновить коммент")
     @Test
     void notFoundExceptionByUpdate() throws Exception {
-        given(commentService.update(any(), any()))
-                .willThrow(EntityNotFoundException.class);
+        given(commentService.update(any())).willThrow(EntityNotFoundException.class);
 
         CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getText(), dto.getBookId());
+        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), dto.getBookId());
 
         mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,6 +199,7 @@ class CommentControllerTest {
     }
 
     private CommentDto getExampleOfCommentDto() {
-        return new CommentDto(FIRST_COMMENT_ID, "a", FIRST_COMMENT_ID);
+        return new CommentDto(FIRST_COMMENT_ID, "a", FIRST_BOOK_ID);
     }
+
 }

@@ -46,8 +46,8 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Override
     public BookDto create(BookCreateDto bookDto) {
-        final Long authorId = bookDto.getAuthor().getId();
-        final Long genreId = bookDto.getGenre().getId();
+        final Long authorId = bookDto.getAuthorId();
+        final Long genreId = bookDto.getGenreId();
 
         var author = authorRepository.findById(authorId)
                 .orElseThrow(() ->
@@ -55,7 +55,7 @@ public class BookServiceImpl implements BookService {
         var genre = genreRepository.findById(genreId)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Genre with id %d not found".formatted(genreId)));
-        var book = bookMapper.toModel(bookDto);
+        var book = bookMapper.toModel(bookDto, author, genre);
         book.setAuthor(author);
         book.setGenre(genre);
         return bookMapper.toDto(bookRepository.save(book));
@@ -68,8 +68,8 @@ public class BookServiceImpl implements BookService {
             throw new EntityNotFoundException();
         }
 
-        final Long authorId = bookDto.getAuthor().getId();
-        final Long genreId = bookDto.getGenre().getId();
+        final Long authorId = bookDto.getAuthorId();
+        final Long genreId = bookDto.getGenreId();
 
         bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
                 "Book with id %d not found".formatted(id)));
@@ -80,7 +80,7 @@ public class BookServiceImpl implements BookService {
         var genre = genreRepository.findById(genreId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Genre with id %d not found".formatted(genreId)));
-        var book = bookMapper.toModel(id, bookDto);
+        var book = bookMapper.toModel(bookDto, author, genre);
         book.setAuthor(author);
         book.setGenre(genre);
 
