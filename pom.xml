@@ -22,7 +22,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <maven.compiler.source>17</maven.compiler.source>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>6.1.1</spring.version>
+        <spring.version>6.1.2</spring.version>
         <opencsv.version>5.8</opencsv.version>
         <junit.version>5.10.0</junit.version>
         <mockito.version>5.4.0</mockito.version>
@@ -136,6 +136,7 @@
         <module>hw06-jpa</module>
         <module>hw07-spring_data_jpa</module>
         <module>hw08-mongodb</module>
+        <module>hw09-mvc</module>
     </modules>
 
 </project>
