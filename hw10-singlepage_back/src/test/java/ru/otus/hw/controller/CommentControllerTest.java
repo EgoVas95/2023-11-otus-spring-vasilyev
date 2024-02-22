@@ -12,9 +12,6 @@ import ru.otus.hw.dto.CommentCreateDto;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.Author;
-import ru.otus.hw.models.Book;
-import ru.otus.hw.models.Genre;
 import ru.otus.hw.services.CommentServiceImpl;
 
 import java.util.List;
@@ -71,7 +68,7 @@ class CommentControllerTest {
 
         given(commentService.findById(any())).willReturn(dto);
 
-        mvc.perform(get("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID)))
+        mvc.perform(get("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
@@ -81,7 +78,7 @@ class CommentControllerTest {
     void shouldGetNotFoundComment() throws Exception {
         given(commentService.findById(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID)))
+        mvc.perform(get("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
                 .andExpect(status().isNotFound());
     }
 
@@ -95,7 +92,7 @@ class CommentControllerTest {
         CommentCreateDto createDto = new CommentCreateDto(dto.getText(),
                 dto.getBookId());
 
-        mvc.perform(post("/api/books/%d/comments".formatted(FIRST_BOOK_ID))
+        mvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
                 .andExpect(status().isOk())
@@ -109,7 +106,7 @@ class CommentControllerTest {
         CommentCreateDto createDto = new CommentCreateDto(null,
                 dto.getBookId());
 
-        mvc.perform(post("/api/books/%d/comments".formatted(FIRST_BOOK_ID))
+        mvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
                 .andExpect(status().isBadRequest());
@@ -125,7 +122,7 @@ class CommentControllerTest {
         CommentCreateDto createDto = new CommentCreateDto("123",
                 null);
 
-        mvc.perform(post("/api/books/%d/comments".formatted(FIRST_BOOK_ID))
+        mvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
                 .andExpect(status().isBadRequest());
@@ -140,7 +137,7 @@ class CommentControllerTest {
         CommentUpdateDto updateDto = new CommentUpdateDto(FIRST_COMMENT_ID,
                 dto.getText(), dto.getBookId());
 
-        mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
+        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isOk())
@@ -153,7 +150,7 @@ class CommentControllerTest {
         CommentDto dto = getExampleOfCommentDto();
         CommentUpdateDto updateDto = new CommentUpdateDto(null, dto.getText(), FIRST_BOOK_ID);
 
-        mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
+        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest());
@@ -165,7 +162,7 @@ class CommentControllerTest {
         CommentDto dto = getExampleOfCommentDto();
         CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), null);
 
-        mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
+        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest());
@@ -179,7 +176,7 @@ class CommentControllerTest {
         CommentDto dto = getExampleOfCommentDto();
         CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), dto.getBookId());
 
-        mvc.perform(patch("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID))
+        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isNotFound());
@@ -188,7 +185,7 @@ class CommentControllerTest {
     @DisplayName("Должен удалить коммент")
     @Test
     void shouldDeleteBook() throws Exception {
-        mvc.perform(delete("/api/books/%d/comments/%d".formatted(FIRST_BOOK_ID, FIRST_COMMENT_ID)))
+        mvc.perform(delete("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
                 .andExpect(status().isOk());
     }
 

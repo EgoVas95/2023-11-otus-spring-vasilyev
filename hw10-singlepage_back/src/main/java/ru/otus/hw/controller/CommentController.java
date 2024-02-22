@@ -26,23 +26,23 @@ public class CommentController {
         return commentService.findAllForBook(id);
     }
 
-    @GetMapping("/api/books/{id}/comments/{comment_id}")
+    @GetMapping("/api/comments/{comment_id}")
     public CommentDto getCommentById(@PathVariable("comment_id") Long commentId) {
         return commentService.findById(commentId);
     }
 
-    @PostMapping("/api/books/{id}/comments")
+    @PostMapping("/api/comments")
     public CommentDto addCommentForBook(@Valid @RequestBody CommentCreateDto dto) {
         return commentService.create(dto);
     }
 
-    @PatchMapping("/api/books/{id}/comments/{comment_id}")
+    @PatchMapping("/api/comments/{comment_id}")
     public CommentDto updateComment(@PathVariable("comment_id") Long commentId,
             @Valid @RequestBody CommentUpdateDto dto) {
         return commentService.update(dto);
     }
 
-    @DeleteMapping("/api/books/{id}/comments/{comment_id}")
+    @DeleteMapping("/api/comments/{comment_id}")
     public void deleteComment(@PathVariable("comment_id") Long commentId) {
         commentService.deleteById(commentId);
     }
