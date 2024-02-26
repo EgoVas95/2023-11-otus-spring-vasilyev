@@ -18,10 +18,10 @@ public class ExceptionController {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<String>> handleEntityValidateEx(MethodArgumentNotValidException ex) {
-        final List<String> errors = ex.getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .toList();
+        final String[] errors = ex.getAllErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage).toArray(String[]::new);
         return ResponseEntity.badRequest()
-                .body(errors);
+                .header("errorMsgs", errors)
+                .build();
     }
 }
