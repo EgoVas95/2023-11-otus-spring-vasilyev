@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { Book } from '../model/book';
 import { environment } from '../../environments/environment';
+import { BookData } from '../model/book-data';
 
 @Injectable({
   providedIn: 'root'
@@ -19,27 +20,43 @@ export class BookService {
 
   getApiWithId(id: number): string {
     let idStr = (id === null || id === undefined) ? '' : ("" + id);
-    let url = this.endPoint.concat('books/', idStr);
-    return url;
+    return this.endPoint.concat('books/', idStr);
   }
 
   public getAllBooks(): Observable<Book[]> {
-    return this.http.get<Book[]>(this.contextPath);
+    return this.http.get<Book[]>(this.contextPath).pipe(
+      catchError(this.handleError)
+    );
   }
 
   public getBook(id: number): Observable<Book> {
-   return this.http.get<Book>(this.getApiWithId(id));
+    return this.http.get<Book>(this.getApiWithId(id)).pipe(
+      catchError(this.handleError)
+    );
   }
 
   public saveBook(book: Book): Observable<Book> {
     if(book.id !== undefined && book.id !== null) {
-      return this.http.patch<Book>(this.getApiWithId(book.id), book.toUpdateCreateJson);
+      return this.http.patch<Book>(this.getApiWithId(book.id), new BookData(book)).pipe(
+        catchError(this.handleError)
+      );
     } else {
-      return this.http.post<Book>(this.contextPath, book.toUpdateCreateJson);
+      return this.http.post<Book>(this.contextPath, new BookData(book)).pipe(
+        catchError(this.handleError)
+      );
     }
   }
 
   public deleteBook(id: number) {
-   return this.http.delete(this.getApiWithId(id));
+    return this.http.delete(this.getApiWithId(id)).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMsg = error.headers.get('errorMsgs')?.toString();
+    errorMsg = errorMsg === undefined ? '' : errorMsg;
+    console.log(errorMsg);
+    return throwError(() => new Error(errorMsg));
   }
 }

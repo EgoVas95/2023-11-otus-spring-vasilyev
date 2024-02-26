@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { MatFormField, MatFormFieldControl, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { NgFor } from '@angular/common';
 import { Book } from '../../model/book';
@@ -21,23 +21,23 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './book-edit.component.html',
   styleUrl: './book-edit.component.scss'
 })
-export class BookEditComponent {
+export class BookEditComponent implements OnInit {
   book: Book;
   authors: Author[];
   genres: Genre[];
 
   constructor(private route:ActivatedRoute,
-    private router:Router,
-    private bookService: BookService,
-    private authorService: AuthorService,
-    private genreService: GenreService) {
-      this.book = new Book()
-      this.authors = new Array;
-      this.genres = new Array;
+              private router:Router,
+              private bookService: BookService,
+              private authorService: AuthorService,
+              private genreService: GenreService) {
+    this.book = new Book()
+    this.authors = [];
+    this.genres = [];
   }
 
-  onSubmit() {
-    this.bookService.saveBook(this.book).subscribe(result => this.goToBookList());
+  saveBook() {
+    this.bookService.saveBook(this.book).subscribe(() => this.goToBookList());
   }
 
   goToBookList() {
@@ -55,22 +55,22 @@ export class BookEditComponent {
       this.book = data;
 
       if (typeof this.book.author !== undefined &&
-            this.book.author?.id !== undefined) {
-              this.authors.forEach(element => {
-              if(element !== undefined && this.book.author?.id === element.id) {
-                this.book.author = element;
-                return;
-              }
+        this.book.author?.id !== undefined) {
+        this.authors.forEach(element => {
+          if(element !== undefined && this.book.author?.id === element.id) {
+            this.book.author = element;
+            return;
+          }
         });
       }
 
       if (typeof this.book.genre !== undefined &&
         this.book.genre?.id !== undefined) {
-            this.genres.forEach(element => {
-            if(element !== undefined && this.book.genre?.id === element.id) {
-              this.book.genre = element;
-              return;
-            }
+        this.genres.forEach(element => {
+          if(element !== undefined && this.book.genre?.id === element.id) {
+            this.book.genre = element;
+            return;
+          }
         });
       }
 

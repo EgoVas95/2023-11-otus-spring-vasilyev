@@ -8,13 +8,4 @@ export class Book {
   genre?: Genre | null | undefined;
 
   constructor() {}
-
-  toUpdateCreateJson() {
-    return {
-      "id": this.id,
-      "title": this.title,
-      "authorId": (this.author === null || this.author === undefined) ? null : this.author.id,
-      "genreId": (this.genre === null || this.genre === undefined) ? null : this.genre.id
-    }
-  }
 }

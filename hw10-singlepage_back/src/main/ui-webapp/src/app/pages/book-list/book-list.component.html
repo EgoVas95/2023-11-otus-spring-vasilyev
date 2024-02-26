@@ -1,5 +1,3 @@
-<h3>Books: </h3>
-
 <button mat-raised-button color="primary" (click)="goToCreateBook()">
   Create new book
 </button><br/><br/>
@@ -26,12 +24,20 @@
     <td mat-cell *matCellDef="let element"> {{element.genre.name}} </td>
   </ng-container>
 
-  <ng-container matColumnDef="goToEdit">
+  <ng-container matColumnDef="actions">
     <th mat-header-cell *matHeaderCellDef>Action</th>
     <td mat-cell *matCellDef="let element">
-      <button mat-raised-button color="primary" (click)="goToEditBook(element)">
-        Edit
-      </button>
+      <div class="horizontal-content">
+        <button mat-raised-button color="primary" (click)="goToEditBook(element)">
+          Edit
+        </button>
+        <button mat-raised-button color="accent" (click)="showComment(element)">
+          Show comments
+        </button>
+        <button mat-raised-button color="warn" (click)="deleteBook(element)">
+          Delete
+        </button>
+      </div>
     </td>
   </ng-container>
 

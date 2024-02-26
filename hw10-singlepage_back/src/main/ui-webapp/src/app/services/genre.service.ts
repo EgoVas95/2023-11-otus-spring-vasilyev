@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { Genre } from '../model/genre';
 
 @Injectable({
@@ -18,6 +18,15 @@ export class GenreService {
   }
 
   public getGenreList(): Observable<Genre[]> {
-    return this.http.get<Genre[]>(this.contextPath);
+    return this.http.get<Genre[]>(this.contextPath).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMsg = error.headers.get('errorMsgs')?.toString();
+    errorMsg = errorMsg === undefined ? '' : errorMsg;
+    console.log(errorMsg);
+    return throwError(() => new Error(errorMsg));
   }
 }

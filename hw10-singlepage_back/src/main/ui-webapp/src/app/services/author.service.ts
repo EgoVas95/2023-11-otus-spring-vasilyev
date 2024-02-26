@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import {HttpBackend, HttpClient} from "@angular/common/http";
+import { HttpClient, HttpErrorResponse} from "@angular/common/http";
 import { environment } from '../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { Author } from '../model/author';
 
 @Injectable({
@@ -18,6 +18,15 @@ export class AuthorService {
   }
 
   public getAuthorList(): Observable<Author[]> {
-    return this.http.get<Author[]>(this.contextPath);
+    return this.http.get<Author[]>(this.contextPath).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMsg = error.headers.get('errorMsgs')?.toString();
+    errorMsg = errorMsg === undefined ? '' : errorMsg;
+    console.log(errorMsg);
+    return throwError(() => new Error(errorMsg));
   }
 }

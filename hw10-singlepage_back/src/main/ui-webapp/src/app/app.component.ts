@@ -5,16 +5,14 @@ import { BookListComponent } from './pages/book-list/book-list.component';
 import { BookEditComponent } from './pages/book-edit/book-edit.component';
 
 import { MatButtonModule } from '@angular/material/button'
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { MatLabel } from '@angular/material/form-field';
 import { NgFor } from '@angular/common';
 
-
 import { HttpClientModule } from '@angular/common/http';
-import { ɵBrowserAnimationBuilder } from '@angular/animations';
 
 @Component({
   selector: 'app-root',
@@ -36,7 +34,8 @@ import { ɵBrowserAnimationBuilder } from '@angular/animations';
     NgFor,
 
     BookListComponent,
-    BookEditComponent,],
+    BookEditComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
