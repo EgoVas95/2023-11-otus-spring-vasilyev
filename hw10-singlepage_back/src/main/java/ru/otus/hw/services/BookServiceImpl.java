@@ -77,8 +77,6 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Genre with id %d not found".formatted(genreId)));
         var book = bookMapper.toModel(bookDto, author, genre);
-        book.setAuthor(author);
-        book.setGenre(genre);
 
         return bookMapper.toDto(bookRepository.save(book));
     }
