@@ -95,7 +95,7 @@ class CommentControllerTest {
         mvc.perform(post("/api/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
 
@@ -140,7 +140,7 @@ class CommentControllerTest {
         mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
 
@@ -159,13 +159,15 @@ class CommentControllerTest {
     @DisplayName("Ошибка при изменении с невалидным book_id")
     @Test
     void shouldThrowExUpdInvalidBookId() throws Exception {
+        given(commentService.update(any())).willThrow(EntityNotFoundException.class);
+
         CommentDto dto = getExampleOfCommentDto();
         CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), null);
 
         mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound());
     }
 
     @DisplayName("Not found exception при попытке обновить коммент")
@@ -186,7 +188,7 @@ class CommentControllerTest {
     @Test
     void shouldDeleteBook() throws Exception {
         mvc.perform(delete("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private List<CommentDto> getExampleCommentList() {

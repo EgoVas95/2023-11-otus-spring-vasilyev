@@ -75,7 +75,7 @@ class BookControllerTest {
     @Test
     void shouldGetNotFoundEntity() throws Exception {
         given(bookService.findById(any()))
-                .willThrow(new EntityNotFoundException(null));
+                .willThrow(EntityNotFoundException.class);
 
         mvc.perform(get("/api/books/%d".formatted(FIRST_BOOK_ID)))
                 .andExpect(status().isNotFound());
@@ -95,7 +95,7 @@ class BookControllerTest {
         mvc.perform(post("/api/books")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(bookDto)));
     }
 
@@ -129,7 +129,7 @@ class BookControllerTest {
     @Test
     void shouldUpdateBook() throws Exception {
         BookDto bookDto = getExampleOfBookDto();
-        given(bookService.update(any(), any()))
+        given(bookService.update(any()))
                 .willReturn(bookDto);
 
         BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(),
@@ -140,15 +140,14 @@ class BookControllerTest {
         mvc.perform(patch("/api/books/%d".formatted(bookDto.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isAccepted())
                 .andExpect(content().json(mapper.writeValueAsString(bookDto)));
     }
 
     @DisplayName("Not found exception при попытке обновить книгу")
     @Test
     void notFoundExceptionByUpdate() throws Exception {
-        given(bookService.update(any(), any()))
-                .willThrow(EntityNotFoundException.class);
+        given(bookService.update(any())).willThrow(EntityNotFoundException.class);
 
         BookDto bookDto = getExampleOfBookDto();
         BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(), bookDto.getTitle(),
@@ -159,9 +158,9 @@ class BookControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    @DisplayName("Ошибка валидации id автора при создании книги")
+    @DisplayName("Должен обновить книгу с невалидным автором")
     @Test
-    void exceptionByCreateWithNonValidIdAuthor() throws Exception {
+    void nonExceptionByUpdateWithNonValidIdAuthor() throws Exception {
         BookDto book = getExampleOfBookDto();
         given(bookService.findById(book.getId()))
                 .willReturn(book);
@@ -172,10 +171,10 @@ class BookControllerTest {
         mvc.perform(patch("/api/books/%d".formatted(book.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isAccepted());
     }
 
-    @DisplayName("Ошибка валидации id жанра при создании книги")
+    @DisplayName("Должен обновить книгу с невалидным жанром")
     @Test
     void exceptionByCreateWithNonValidIGenre() throws Exception {
         BookDto book = getExampleOfBookDto();
@@ -188,14 +187,14 @@ class BookControllerTest {
         mvc.perform(patch("/api/books/%d".formatted(book.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isAccepted());
     }
 
     @DisplayName("Должен удалить книгу")
     @Test
     void shouldDeleteBook() throws Exception {
         mvc.perform(delete("/api/books/%d".formatted(FIRST_BOOK_ID)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     private List<BookDto> getExampleBookList() {

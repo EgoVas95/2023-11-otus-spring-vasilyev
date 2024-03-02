@@ -8,6 +8,7 @@ import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.mappers.BookMapper;
+import ru.otus.hw.models.Book;
 import ru.otus.hw.repositories.AuthorRepository;
 import ru.otus.hw.repositories.BookRepository;
 import ru.otus.hw.repositories.GenreRepository;
@@ -56,28 +57,23 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() ->
                         new EntityNotFoundException("Genre with id %d not found".formatted(genreId)));
         var book = bookMapper.toModel(bookDto, author, genre);
-        book.setAuthor(author);
-        book.setGenre(genre);
         return bookMapper.toDto(bookRepository.save(book));
     }
 
     @Transactional
     @Override
-    public BookDto update(Long id, BookUpdateDto bookDto) {
-        if (bookDto == null) {
-            throw new EntityNotFoundException();
-        }
-
+    public BookDto update(BookUpdateDto bookDto) {
         final Long authorId = bookDto.getAuthorId();
         final Long genreId = bookDto.getGenreId();
 
-        bookRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(
-                "Book with id %d not found".formatted(id)));
+        final Long bookId = bookDto.getId();
+        Book findedBook = bookRepository.findById(bookId).orElseThrow(() -> new EntityNotFoundException(
+                "Book with id %d not found".formatted(bookId)));
 
-        var author = authorRepository.findById(authorId)
+        var author = authorId == null ? findedBook.getAuthor() : authorRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Author with id %d not found".formatted(authorId)));
-        var genre = genreRepository.findById(genreId)
+        var genre = genreId == null ? findedBook.getGenre() : genreRepository.findById(genreId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Genre with id %d not found".formatted(genreId)));
         var book = bookMapper.toModel(bookDto, author, genre);
