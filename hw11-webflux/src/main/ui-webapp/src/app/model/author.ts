@@ -1,8 +1,8 @@
 export class Author {
-  id?: number;
+  id?: string;
   fullName?: string;
 
-  constructor(id?: number, fullName?: string) {
+  constructor(id?: string, fullName?: string) {
     this.id = id;
     this.fullName = fullName;
   }

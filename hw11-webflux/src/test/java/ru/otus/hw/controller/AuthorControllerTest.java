@@ -1,51 +1,62 @@
 package ru.otus.hw.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 import ru.otus.hw.dto.AuthorDto;
-import ru.otus.hw.services.AuthorServiceImpl;
+import ru.otus.hw.mappers.AuthorMapper;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.repositories.AuthorRepository;
 
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Тестирование контроллера авторов")
-@WebMvcTest(AuthorController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthorControllerTest {
 
     @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private WebTestClient webTestClient;
 
     @MockBean
-    private AuthorServiceImpl authorService;
+    private AuthorRepository authorRepository;
+
+    @Autowired
+    private AuthorMapper mapper;
 
     @DisplayName("Должен вернуть валидный список авторов")
     @Test
-    void shouldGetAllAuthors() throws Exception {
-        AuthorDto[] exampleList = getExampleAuthors();
-        given(authorService.findAll()).willReturn(Flux.just(exampleList));
+    void shouldGetAllAuthors() {
+        Author[] exampleList = getExampleAuthors();
+        given(authorRepository.findAll()).willReturn(Flux.just(exampleList));
 
+        var result = webTestClient.get().uri("/api/authors")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(AuthorDto.class)
+                .getResponseBody();
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<AuthorDto> stepResult = null;
+        for (Author author : exampleList) {
+            stepResult = step.expectNext(mapper.toDto(author));
+        }
 
-        mvc.perform(get("/api/authors"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(exampleList)));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
-    private AuthorDto[] getExampleAuthors() {
+    private Author[] getExampleAuthors() {
         return LongStream.range(1L, 4L).boxed()
-                .map(id -> new AuthorDto(id, "name %d".formatted(id)))
-                .toArray(AuthorDto[]::new);
+                .map(id -> new Author(String.valueOf(id), "name %d".formatted(id)))
+                .toArray(Author[]::new);
     }
 }

@@ -20,29 +20,29 @@ export class CommentService {
     return this.endPoint.concat(this.commentsApiPath);
   }
 
-  getApiWithId(id: number): string {
+  getApiWithId(id: string): string {
     let idStr = (id === null || id === undefined) ? '' : ("" + id);
     return this.endPoint.concat(this.commentsApiPath, '/', idStr);
   }
 
-  private getBookApiWithId(bookId: number): string {
+  private getBookApiWithId(bookId: string): string {
     return this.endPoint.concat(this.booksApiPath, '/',
       ("" + bookId), '/', this.commentsApiPath);
   }
 
-  public getComment(id: number): Observable<Comment> {
+  public getComment(id: string): Observable<Comment> {
     return this.http.get<Comment>(this.getApiWithId(id)).pipe(
       catchError(this.handleError)
     );
   }
 
-  public getCommentsForBook(id: number): Observable<Comment[]> {
+  public getCommentsForBook(id: string): Observable<Comment[]> {
     return this.http.get<Comment[]>(this.getBookApiWithId(id)).pipe(
       catchError(this.handleError)
     );
   }
 
-  public updateComment(id: number, comment: CommentData): Observable<Comment> {
+  public updateComment(id: string, comment: CommentData): Observable<Comment> {
     return this.http.patch<CommentData>(this.getApiWithId(id), comment).pipe(
       catchError(this.handleError)
     );
@@ -54,7 +54,7 @@ export class CommentService {
     );
   }
 
-  public deleteComment(id: number) {
+  public deleteComment(id: string) {
     return this.http.delete(this.getApiWithId(id)).pipe(
       catchError(this.handleError)
     );

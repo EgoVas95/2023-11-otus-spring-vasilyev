@@ -1,51 +1,62 @@
 package ru.otus.hw.controller;
 
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 import ru.otus.hw.dto.GenreDto;
-import ru.otus.hw.services.GenreServiceImpl;
+import ru.otus.hw.mappers.GenreMapper;
+import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.GenreRepository;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Тестирование контроллера жанров")
-@WebMvcTest(GenreController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GenreControllerTest {
 
     @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private WebTestClient webTestClient;
 
     @MockBean
-    private GenreServiceImpl genreService;
+    private GenreRepository genreRepository;
+
+    @Autowired
+    private GenreMapper mapper;
 
     @DisplayName("Должен вернуть валидный список жанров")
     @Test
-    void shouldGetAllGenres() throws Exception {
-        GenreDto[] exampleList = getExampleGenres();
+    void shouldGetAllGenres() {
+        Genre[] exampleList = getExampleGenres();
+        given(genreRepository.findAll()).willReturn(Flux.just(exampleList));
 
-        given(genreService.findAll()).willReturn(Flux.just(exampleList));
-        mvc.perform(get("/api/genres"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(exampleList)));
+        var result = webTestClient.get().uri("/api/genres")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(GenreDto.class)
+                .getResponseBody();
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<GenreDto> stepResult = null;
+        for (Genre genre : exampleList) {
+            stepResult = step.expectNext(mapper.toDto(genre));
+        }
+
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
-    private GenreDto[] getExampleGenres() {
-        return LongStream.range(1L, 4L).boxed()
-                .map(id -> new GenreDto(id, "name %d".formatted(id)))
-                .toArray(GenreDto[]::new);
+    private Genre[] getExampleGenres() {
+        return IntStream.range(1, 4).boxed()
+                .map(id -> new Genre(String.valueOf(id), "name %d".formatted(id)))
+                .toArray(Genre[]::new);
     }
 }

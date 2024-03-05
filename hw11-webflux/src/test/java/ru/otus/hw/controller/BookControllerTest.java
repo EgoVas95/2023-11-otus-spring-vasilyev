@@ -1,216 +1,269 @@
 package ru.otus.hw.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.otus.hw.dto.*;
+import reactor.test.StepVerifier;
+import ru.otus.hw.dto.BookCreateDto;
+import ru.otus.hw.dto.BookDto;
+import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.services.AuthorServiceImpl;
-import ru.otus.hw.services.BookServiceImpl;
-import ru.otus.hw.services.GenreServiceImpl;
+import ru.otus.hw.mappers.BookMapper;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.AuthorRepository;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.GenreRepository;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @DisplayName("Тестирование контроллера книг")
-@WebMvcTest(BookController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BookControllerTest {
 
-    private static final long FIRST_BOOK_ID = 1L;
+    private static final String FIRST_BOOK_ID = "1";
+
+    @MockBean
+    private BookRepository bookRepository;
+
+    @MockBean
+    private AuthorRepository authorRepository;
+
+    @MockBean
+    private GenreRepository genreRepository;
 
     @Autowired
-    private MockMvc mvc;
+    private WebTestClient webTestClient;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @MockBean
-    private BookServiceImpl bookService;
-
-    @MockBean
-    private AuthorServiceImpl authorService;
-
-    @MockBean
-    private GenreServiceImpl genreService;
+    private BookMapper mapper;
 
     @DisplayName("Должен вернуть валидный список книг")
     @Test
-    void shouldGetAllBooks() throws Exception {
-        BookDto[] exampleList = getExampleBooks();
+    void shouldGetAllBooks() {
+        Book[] exampleList = getExampleBooks();
+        given(bookRepository.findAll()).willReturn(Flux.just(exampleList));
+        var result = webTestClient.get().uri("/api/books")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(BookDto.class)
+                .getResponseBody();
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<BookDto> stepResult = null;
+        for (Book book : exampleList) {
+            stepResult = step.expectNext(mapper.toDto(book));
+        }
 
-        given(bookService.findAll()).willReturn(Flux.just(exampleList));
-        mvc.perform(get("/api/books"))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(exampleList)));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Должен вернуть правильную книгу")
     @Test
-    void shouldGetCorrectBook() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
+    void shouldGetCorrectBook() {
+        Book book = getExampleOfBook();
+        given(bookRepository.findById((String) any())).willReturn(Mono.just(book));
 
-        given(bookService.findById(any())).willReturn(Mono.just(bookDto));
+        var result = webTestClient.get().uri("/api/books/%s".formatted(book.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(BookDto.class)
+                .getResponseBody();
 
-        mvc.perform(get("/api/books/%d".formatted(bookDto.getId())))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<BookDto> stepResult = step.expectNext(mapper.toDto(book));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Должен вернуться ошибка при поиске книги")
     @Test
-    void shouldGetNotFoundEntity() throws Exception {
-        given(bookService.findById(any()))
+    void shouldGetNotFoundEntity() {
+        given(bookRepository.findById((String) any()))
                 .willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/books/%d".formatted(FIRST_BOOK_ID)))
-                .andExpect(status().isNotFound());
+        webTestClient.get()
+                .uri("/api/books/".concat(FIRST_BOOK_ID))
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Должен добавить новую книгу")
     @Test
-    void shouldAddNewBook() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        given(bookService.create(any()))
-                .willReturn(Mono.just(bookDto));
+    void shouldAddNewBook() {
+        Book book = getExampleOfBook();
 
-        BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), bookDto.getAuthor().getId(),
-                bookDto.getGenre().getId());
+        given(authorRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getAuthor()));
+        given(genreRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getGenre()));
+        given(bookRepository.save(any()))
+                .willReturn(Mono.just(book));
 
-        mvc.perform(post("/api/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isCreated())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+        BookCreateDto bookCreateDto = new BookCreateDto(book.getId(),
+                book.getTitle(), book.getAuthor().getId(),
+                book.getGenre().getId());
+
+        var result = webTestClient
+                .post().uri("/api/books")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(bookCreateDto)
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(BookDto.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<BookDto> stepResult = step.expectNext(mapper.toDto(book));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Должен выкинуть ошибку при добавлении невалидного автора id")
     @Test
-    void shouldExceptionAddNewBookWithInvalidAuthorId() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), null, bookDto.getGenre().getId());
+    void shouldExceptionAddNewBookWithInvalidAuthorId() {
+        Book book = getExampleOfBook();
+        given(authorRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getAuthor()));
+        given(genreRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getGenre()));
+        given(bookRepository.save(any()))
+                .willReturn(Mono.just(book));
 
-        mvc.perform(post("/api/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isBadRequest());
+        BookCreateDto bookCreateDto = new BookCreateDto(book.getId(),
+                book.getTitle(), null, book.getGenre().getId());
+
+        webTestClient.post()
+                .uri("/api/books")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(bookCreateDto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @DisplayName("Должен выкинуть ошибку при добавлении невалидного жанра id")
     @Test
-    void shouldExceptionAddNewBookWithInvalidGenreId() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        BookCreateDto bookCreateDto = new BookCreateDto(bookDto.getId(),
-                bookDto.getTitle(), bookDto.getAuthor().getId(), null);
+    void shouldExceptionAddNewBookWithInvalidGenreId() {
+        Book book = getExampleOfBook();
+        BookCreateDto bookCreateDto = new BookCreateDto(book.getId(),
+                book.getTitle(), book.getAuthor().getId(), null);
 
-        mvc.perform(post("/api/books")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookCreateDto)))
-                .andExpect(status().isBadRequest());
+        webTestClient.post()
+                .uri("/api/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(bookCreateDto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @DisplayName("Должен обновить старую книгу")
     @Test
-    void shouldUpdateBook() throws Exception {
-        BookDto bookDto = getExampleOfBookDto();
-        given(bookService.update(any()))
-                .willReturn(Mono.just(bookDto));
+    void shouldUpdateBook() {
+        Book book = getExampleOfBook();
 
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(),
-                bookDto.getTitle(),
-                bookDto.getAuthor().getId(),
-                bookDto.getGenre().getId());
+        given(authorRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getAuthor()));
+        given(genreRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getGenre()));
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(book));
+        given(bookRepository.save(any()))
+                .willReturn(Mono.just(book));
 
-        mvc.perform(patch("/api/books/%d".formatted(bookDto.getId()))
+        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(),
+                book.getTitle(),
+                book.getAuthor().getId(),
+                book.getGenre().getId());
+
+        var result = webTestClient
+                .patch().uri("/api/books/".concat(book.getId()))
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isAccepted())
-                .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+                .bodyValue(bookUpdateDto)
+                .exchange()
+                .expectStatus().isAccepted()
+                .returnResult(BookDto.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<BookDto> stepResult = step.expectNext(mapper.toDto(book));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Not found exception при попытке обновить книгу")
     @Test
-    void notFoundExceptionByUpdate() throws Exception {
-        given(bookService.update(any())).willThrow(EntityNotFoundException.class);
+    void notFoundExceptionByUpdate() {
+        Book book = getExampleOfBook();
 
-        BookDto bookDto = getExampleOfBookDto();
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(bookDto.getId(), bookDto.getTitle(),
-                bookDto.getAuthor().getId(), bookDto.getGenre().getId());
-        mvc.perform(patch("/api/books/%d".formatted(FIRST_BOOK_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isNotFound());
-    }
-
-    @DisplayName("Должен обновить книгу с невалидным автором")
-    @Test
-    void nonExceptionByUpdateWithNonValidIdAuthor() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        given(bookService.findById(book.getId()))
+        given(authorRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getAuthor()));
+        given(genreRepository.findById((String) any()))
+                .willReturn(Mono.just(book.getGenre()));
+        given(bookRepository.findById((String) any()))
                 .willReturn(Mono.just(book));
+        given(bookRepository.save(any())).willThrow(EntityNotFoundException.class);
 
         BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                null, book.getGenre().getId());
+                book.getAuthor().getId(), book.getGenre().getId());
 
-        mvc.perform(patch("/api/books/%d".formatted(book.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isAccepted());
-    }
-
-    @DisplayName("Должен обновить книгу с невалидным жанром")
-    @Test
-    void exceptionByCreateWithNonValidIGenre() throws Exception {
-        BookDto book = getExampleOfBookDto();
-        given(bookService.findById(book.getId()))
-                .willReturn(Mono.just(book));
-        BookUpdateDto bookUpdateDto = new BookUpdateDto(book.getId(), book.getTitle(),
-                book.getAuthor().getId(), null);
-
-
-        mvc.perform(patch("/api/books/%d".formatted(book.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(bookUpdateDto)))
-                .andExpect(status().isAccepted());
+        webTestClient.patch()
+                .uri("/api/books/".concat(FIRST_BOOK_ID))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(bookUpdateDto)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Должен удалить книгу")
     @Test
-    void shouldDeleteBook() throws Exception {
-        mvc.perform(delete("/api/books/%d".formatted(FIRST_BOOK_ID)))
-                .andExpect(status().isNoContent());
+    void shouldDeleteBook() {
+        given(bookRepository.deleteById((String) any())).willReturn(Mono.empty());
+
+        var result = webTestClient
+                .delete().uri("/api/books/".concat(FIRST_BOOK_ID))
+                .exchange()
+                .expectStatus().isNoContent()
+                .returnResult(Void.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        step.verifyComplete();
     }
 
-    private BookDto[] getExampleBooks() {
-        return LongStream.range(1L, 4L).boxed()
-                .map(id -> new BookDto(id, "title %d".formatted(id),
-                        new AuthorDto(id, "name"), new GenreDto(id, "genre")))
-                .toArray(BookDto[]::new);
+    private Book[] getExampleBooks() {
+        return IntStream.range(1, 4).boxed()
+                .map(id -> new Book(String.valueOf(id), "title %d".formatted(id),
+                        new Author(String.valueOf(id), "name"),
+                        new Genre(String.valueOf(id), "genre")))
+                .toArray(Book[]::new);
     }
 
-    private BookDto getExampleOfBookDto() {
-        given(authorService.findAll()).willReturn(Flux.just(new AuthorDto(1L, "A")));
-        given(genreService.findAll()).willReturn(Flux.just(new GenreDto(1L, "G")));
+    private Book getExampleOfBook() {
+        given(authorRepository.findAll()).willReturn(Flux.just(new Author("1", "A")));
+        given(genreRepository.findAll()).willReturn(Flux.just(new Genre("1", "G")));
 
-        return new BookDto(FIRST_BOOK_ID, "a",
-                authorService.findAll().blockFirst(),
-                genreService.findAll().blockFirst());
+        Author author = authorRepository.findAll().blockFirst();
+        assertThat(author).isNotNull();
+
+        Genre genre = genreRepository.findAll().blockFirst();
+        assertThat(genre).isNotNull();
+
+        return new Book(FIRST_BOOK_ID, "a", author, genre);
     }
 }

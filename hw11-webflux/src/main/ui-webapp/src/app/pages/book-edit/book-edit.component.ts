@@ -44,7 +44,7 @@ export class BookEditComponent implements OnInit {
     this.router.navigate(['book-list'])
   }
 
-  private getBookById(id: number) {
+  private getBookById(id: string) {
     if(id === null || id === undefined) {
       this.book = new Book();
       this.book.title = "";

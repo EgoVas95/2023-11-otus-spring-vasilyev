@@ -8,9 +8,9 @@ import lombok.Data;
 @AllArgsConstructor
 public class CommentUpdateDto {
     @NotNull
-    private Long id;
+    private String id;
 
     private String text;
 
-    private Long bookId;
+    private String bookId;
 }

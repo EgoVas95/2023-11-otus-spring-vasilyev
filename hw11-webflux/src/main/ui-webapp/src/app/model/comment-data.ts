@@ -1,9 +1,9 @@
 import { Comment } from "./comment";
 
 export class CommentData {
-    id?: number;
+    id?: string;
     text?: string;
-    bookId?: number;
+    bookId?: string;
 
     constructor(comment: Comment) {
       this.id = comment.id;

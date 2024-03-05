@@ -15,5 +15,5 @@ public class CommentCreateDto {
     private String text;
 
     @NotNull(message = "Book id can't be null")
-    private Long bookId;
+    private String bookId;
 }

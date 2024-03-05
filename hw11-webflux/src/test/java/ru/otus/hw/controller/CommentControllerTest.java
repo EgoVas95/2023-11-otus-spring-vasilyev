@@ -1,205 +1,301 @@
 package ru.otus.hw.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import ru.otus.hw.dto.CommentCreateDto;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.services.CommentServiceImpl;
+import ru.otus.hw.mappers.CommentMapper;
+import ru.otus.hw.models.Author;
+import ru.otus.hw.models.Book;
+import ru.otus.hw.models.Comment;
+import ru.otus.hw.models.Genre;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @DisplayName("Тестирование контроллера книг")
-@WebMvcTest(CommentController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CommentControllerTest {
-    private static final Long FIRST_BOOK_ID = 1L;
-    private static final Long FIRST_COMMENT_ID = 1L;
-
-    @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private static final String FIRST_BOOK_ID = "1";
+    private static final String FIRST_COMMENT_ID = "1";
 
     @MockBean
-    private CommentServiceImpl commentService;
+    private CommentRepository commentRepository;
+    @MockBean
+    private BookRepository bookRepository;
+
+    @Autowired
+    private WebTestClient webTestClient;
+
+    @Autowired
+    private CommentMapper mapper;
 
     @DisplayName("Должен вернуть валидный список комментариев")
     @Test
-    void shouldGetAllBooks() throws Exception {
-        CommentDto[] exampleList = getExampleComments();
-        given(commentService.findAllForBook(any())).willReturn(Flux.just(exampleList));
+    void shouldGetAllBooks() {
+        Comment[] exampleList = getExampleComments();
 
-        mvc.perform(get("/api/books/%d/comments".formatted(FIRST_BOOK_ID)))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(exampleList)));
+        given(commentRepository.findAllByBookId(any())).willReturn(Flux.just(exampleList));
+
+        var result = webTestClient.get()
+                .uri("/api/books/%s/comments".formatted(FIRST_BOOK_ID))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(CommentDto.class)
+                .getResponseBody();
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<CommentDto> stepResult = null;
+        for (Comment comment : exampleList) {
+            stepResult = step.expectNext(mapper.toDto(comment));
+        }
+
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Должна вернуться ошибка при получении всех комментариев для книги")
     @Test
-    void shouldGetNotFoundBook() throws Exception {
-        given(commentService.findAllForBook(any())).willThrow(EntityNotFoundException.class);
+    void shouldGetNotFoundBook() {
+        given(commentRepository.findAllByBookId(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/books/%d/comments".formatted(FIRST_BOOK_ID)))
-                .andExpect(status().isNotFound());
+        webTestClient.get()
+                .uri("/api/books/%s/comments".formatted(FIRST_BOOK_ID))
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Должен вернуть правильный комментарий")
     @Test
-    void shouldGetCorrectComment() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
+    void shouldGetCorrectComment() {
+        Comment comment = getExampleOfCommentDto();
 
-        given(commentService.findById(any())).willReturn(Mono.just(dto));
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(comment.getBook()));
+        given(commentRepository.findById((String) any()))
+                .willReturn(Mono.just(comment));
 
-        mvc.perform(get("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(dto)));
+        var result = webTestClient.get()
+                .uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(CommentDto.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<CommentDto> stepResult = step.expectNext(mapper.toDto(comment));
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Должна вернуться ошибка при поиске комментария")
     @Test
-    void shouldGetNotFoundComment() throws Exception {
-        given(commentService.findById(any())).willThrow(EntityNotFoundException.class);
+    void shouldGetNotFoundComment() {
+        given(commentRepository.findById((String) any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
-                .andExpect(status().isNotFound());
+        webTestClient.get()
+                .uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Должен добавить новый комментарий")
     @Test
-    void shouldAddNewComment() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
-        given(commentService.create(any()))
-                .willReturn(Mono.just(dto));
+    void shouldAddNewComment() {
+        Comment comment = getExampleOfCommentDto();
 
-        CommentCreateDto createDto = new CommentCreateDto(dto.getText(),
-                dto.getBookId());
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(comment.getBook()));
+        given(commentRepository.save(any()))
+                .willReturn(Mono.just(comment));
 
-        mvc.perform(post("/api/comments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isCreated())
-                .andExpect(content().json(mapper.writeValueAsString(dto)));
+        CommentCreateDto createDto = new CommentCreateDto(comment.getText(),
+                comment.getBook().getId());
+
+        var result = webTestClient.post()
+                .uri("/api/comments")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createDto)
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(CommentDto.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<CommentDto> stepResult = step.expectNext(mapper.toDto(comment));
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Ошибка при добавлении с невалидным text")
     @Test
     void shouldThrowExAddInvalidText() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
+        Comment comment = getExampleOfCommentDto();
         CommentCreateDto createDto = new CommentCreateDto(null,
-                dto.getBookId());
+                comment.getBook().getId());
 
-        mvc.perform(post("/api/comments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isBadRequest());
+        webTestClient.post()
+                .uri("/api/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createDto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @DisplayName("Ошибка при добавлении с невалидным book_id")
     @Test
-    void shouldThrowExAddInvalidBookId() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
-        given(commentService.create(any()))
-                .willReturn(Mono.just(dto));
+    void shouldThrowExAddInvalidBookId() {
+        Comment comment = getExampleOfCommentDto();
+        given(commentRepository.save(any()))
+                .willReturn(Mono.just(comment));
 
         CommentCreateDto createDto = new CommentCreateDto("123",
                 null);
 
-        mvc.perform(post("/api/comments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isBadRequest());
+        webTestClient.post()
+                .uri("/api/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createDto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @DisplayName("Должен обновить старый комментарий")
     @Test
-    void shouldUpdateBook() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
-        given(commentService.update(any())).willReturn(Mono.just(dto));
+    void shouldUpdateBook() {
+        Comment comment = getExampleOfCommentDto();
+
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(comment.getBook()));
+        given(commentRepository.findById((String) any()))
+                .willReturn(Mono.just(comment));
+        given(commentRepository.save(any())).willReturn(Mono.just(comment));
 
         CommentUpdateDto updateDto = new CommentUpdateDto(FIRST_COMMENT_ID,
-                dto.getText(), dto.getBookId());
+                comment.getText(), comment.getBook().getId());
 
-        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isAccepted())
-                .andExpect(content().json(mapper.writeValueAsString(dto)));
+        var result = webTestClient.patch()
+                .uri("/api/comments/".concat(FIRST_COMMENT_ID))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateDto)
+                .exchange()
+                .expectStatus().isAccepted()
+                .returnResult(CommentDto.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        StepVerifier.Step<CommentDto> stepResult = step.expectNext(mapper.toDto(comment));
+
+        assertThat(stepResult).isNotNull();
+        stepResult.verifyComplete();
     }
 
     @DisplayName("Ошибка при изменении с невалидным text")
     @Test
-    void shouldThrowExUpdInvalidText() throws Exception {
-        CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(null, dto.getText(), FIRST_BOOK_ID);
+    void shouldThrowExUpdInvalidText() {
+        Comment comment = getExampleOfCommentDto();
+        CommentUpdateDto updateDto = new CommentUpdateDto(null, comment.getText(), FIRST_BOOK_ID);
 
-        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isBadRequest());
+        webTestClient.patch()
+                .uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateDto)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @DisplayName("Ошибка при изменении с невалидным book_id")
     @Test
-    void shouldThrowExUpdInvalidBookId() throws Exception {
-        given(commentService.update(any())).willThrow(EntityNotFoundException.class);
+    void shouldThrowExUpdInvalidBookId() {
+        Comment comment = getExampleOfCommentDto();
 
-        CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), null);
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(comment.getBook()));
+        given(commentRepository.findById((String) any()))
+                .willReturn(Mono.just(comment));
+        given(commentRepository.save(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isNotFound());
+        CommentUpdateDto updateDto = new CommentUpdateDto(
+                comment.getId(), comment.getText(), null);
+
+        webTestClient.patch()
+                .uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateDto)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Not found exception при попытке обновить коммент")
     @Test
-    void notFoundExceptionByUpdate() throws Exception {
-        given(commentService.update(any())).willThrow(EntityNotFoundException.class);
+    void notFoundExceptionByUpdate() {
+        Comment comment = getExampleOfCommentDto();
 
-        CommentDto dto = getExampleOfCommentDto();
-        CommentUpdateDto updateDto = new CommentUpdateDto(dto.getId(), dto.getText(), dto.getBookId());
+        given(bookRepository.findById((String) any()))
+                .willReturn(Mono.just(comment.getBook()));
+        given(commentRepository.findById((String) any()))
+                .willReturn(Mono.just(comment));
+        given(commentRepository.save(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(patch("/api/comments/%d".formatted(FIRST_COMMENT_ID))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isNotFound());
+        CommentUpdateDto updateDto = new CommentUpdateDto(comment.getId(), comment.getText(),
+                comment.getBook().getId());
+
+        webTestClient.patch()
+                .uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updateDto)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @DisplayName("Должен удалить коммент")
     @Test
-    void shouldDeleteBook() throws Exception {
-        mvc.perform(delete("/api/comments/%d".formatted(FIRST_COMMENT_ID)))
-                .andExpect(status().isNoContent());
+    void shouldDeleteBook() {
+        given(commentRepository.deleteById((String) any())).willReturn(Mono.empty());
+
+        var result = webTestClient
+                .delete().uri("/api/comments/%s".formatted(FIRST_COMMENT_ID))
+                .exchange()
+                .expectStatus().isNoContent()
+                .returnResult(Void.class)
+                .getResponseBody();
+
+        var step = StepVerifier.create(result);
+        step.verifyComplete();
     }
 
-    private CommentDto[] getExampleComments() {
-        return LongStream.range(1L, 4L).boxed()
-                .map(id -> new CommentDto(id, "text %d".formatted(id), id))
-                .toArray(CommentDto[]::new);
+    private Comment[] getExampleComments() {
+        return IntStream.range(1, 4).boxed()
+                .map(id -> new Comment(String.valueOf(id), "text %d".formatted(id),
+                        new Book(String.valueOf(id), "title %d".formatted(id),
+                                new Author("fullname %d".formatted(id)),
+                                new Genre("name %d".formatted(id)))))
+                .toArray(Comment[]::new);
     }
 
-    private CommentDto getExampleOfCommentDto() {
-        return new CommentDto(FIRST_COMMENT_ID, "a", FIRST_BOOK_ID);
+    private Comment getExampleOfCommentDto() {
+        return new Comment(FIRST_COMMENT_ID, "c",
+                new Book(FIRST_BOOK_ID, "b",
+                        new Author("a"),
+                        new Genre("g")));
     }
 
 }

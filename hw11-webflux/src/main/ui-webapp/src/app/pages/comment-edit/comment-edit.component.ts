@@ -45,7 +45,7 @@ export class CommentEditComponent implements OnInit {
     this.router.navigate(['book-list'])
   }
 
-  private getCommentById(id: number) {
+  private getCommentById(id: string) {
     if(id === null || id === undefined) {
       this.comment = new Comment();
       this.comment.text = "";

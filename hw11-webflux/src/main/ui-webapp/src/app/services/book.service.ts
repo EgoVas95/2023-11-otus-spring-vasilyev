@@ -18,7 +18,7 @@ export class BookService {
     return this.endPoint.concat('books');
   }
 
-  getApiWithId(id: number): string {
+  getApiWithId(id: string): string {
     let idStr = (id === null || id === undefined) ? '' : ("" + id);
     return this.endPoint.concat('books/', idStr);
   }
@@ -29,7 +29,7 @@ export class BookService {
     );
   }
 
-  public getBook(id: number): Observable<Book> {
+  public getBook(id: string): Observable<Book> {
     return this.http.get<Book>(this.getApiWithId(id)).pipe(
       catchError(this.handleError)
     );
@@ -47,7 +47,7 @@ export class BookService {
     }
   }
 
-  public deleteBook(id: number) {
+  public deleteBook(id: string) {
     return this.http.delete(this.getApiWithId(id)).pipe(
       catchError(this.handleError)
     );

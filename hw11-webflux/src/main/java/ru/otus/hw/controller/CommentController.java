@@ -17,47 +17,58 @@ import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.CommentCreateDto;
 import ru.otus.hw.dto.CommentDto;
 import ru.otus.hw.dto.CommentUpdateDto;
-import ru.otus.hw.services.CommentServiceImpl;
+import ru.otus.hw.mappers.CommentMapper;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.CommentRepository;
 
 
 @RestController
 @RequiredArgsConstructor
 public class CommentController {
-    private final CommentServiceImpl commentService;
+
+    private final CommentRepository commentRepository;
+
+    private final CommentMapper mapper;
+
+    private final BookRepository bookRepository;
 
     @GetMapping("/api/books/{id}/comments")
-    public Flux<CommentDto> getCommentsForBook(@PathVariable("id") Long id) {
-        return commentService.findAllForBook(id);
+    public Flux<CommentDto> getCommentsForBook(@PathVariable("id") String id) {
+        return commentRepository.findAllByBookId(id)
+                .map(mapper::toDto);
     }
 
     @GetMapping("/api/comments/{comment_id}")
-    public Mono<ResponseEntity<CommentDto>> getCommentById(@PathVariable("comment_id") Long commentId) {
-        return commentService.findById(commentId).map(ResponseEntity::ok)
+    public Mono<ResponseEntity<CommentDto>> getCommentById(@PathVariable("comment_id") String id) {
+        return commentRepository.findById(id)
+                .map(mapper::toDto)
+                .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
     }
 
     @PostMapping("/api/comments")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public Mono<ResponseEntity<CommentDto>> addCommentForBook(@Valid @RequestBody CommentCreateDto dto) {
-        return commentService.create(dto)
-                .map(comment -> new ResponseEntity<>(comment, HttpStatus.CREATED))
-                .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
+    public Mono<CommentDto> addCommentForBook(@Valid @RequestBody CommentCreateDto dto) {
+        return bookRepository.findById(dto.getBookId())
+                .flatMap(book -> commentRepository.save(mapper.toModel(dto, book)))
+                .map(mapper::toDto);
     }
 
     @PatchMapping("/api/comments/{comment_id}")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Mono<ResponseEntity<CommentDto>> updateComment(@PathVariable("comment_id") Long commentId,
+    public Mono<ResponseEntity<CommentDto>> updateComment(@PathVariable("comment_id") String commentId,
             @Valid @RequestBody CommentUpdateDto dto) {
         dto.setId(commentId);
-        return commentService.update(dto)
-                .map(comment -> new ResponseEntity<>(comment, HttpStatus.ACCEPTED))
+        return bookRepository.findById(dto.getBookId())
+                .flatMap(book -> commentRepository.save(mapper.toModel(dto, book)))
+                .map(comment -> new ResponseEntity<>(mapper.toDto(comment), HttpStatus.ACCEPTED))
                 .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
     }
 
     @DeleteMapping("/api/comments/{comment_id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public Mono<ResponseEntity<Void>> deleteComment(@PathVariable("comment_id") Long commentId) {
-        return commentService.deleteById(commentId)
+    public Mono<ResponseEntity<Void>> deleteComment(@PathVariable("comment_id") String id) {
+        return commentRepository.deleteById(id)
                 .then(Mono.fromCallable(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT)));
     }
 }

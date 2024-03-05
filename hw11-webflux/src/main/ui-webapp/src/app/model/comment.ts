@@ -1,11 +1,11 @@
 import {Book} from "./book";
 
 export class Comment {
-  id?: number;
+  id?: string;
   text?: string;
   book?: Book;
 
-  constructor(id?: number,
+  constructor(id?: string,
               text?: string,
               book?: Book) {
     this.id = id;

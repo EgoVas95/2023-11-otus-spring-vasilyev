@@ -10,11 +10,11 @@ import lombok.ToString;
 @ToString
 public class BookUpdateDto {
     @NotNull
-    private Long id;
+    private String id;
 
     private String title;
 
-    private Long authorId;
+    private String authorId;
 
-    private Long genreId;
+    private String genreId;
 }

@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class GenreDto {
     @NotNull(message = "Genre id is can't be null!")
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Genre name is can't be empty!")
     private String name;

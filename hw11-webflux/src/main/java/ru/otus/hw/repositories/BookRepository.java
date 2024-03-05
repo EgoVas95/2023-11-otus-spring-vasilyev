@@ -1,19 +1,9 @@
 package ru.otus.hw.repositories;
 
-import jakarta.annotation.Nonnull;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.stereotype.Repository;
 import ru.otus.hw.models.Book;
 
-
-public interface BookRepository extends ReactiveCrudRepository<Book, Long> {
-
-    @Nonnull
-    @Override
-    Flux<Book> findAll();
-
-    @Nonnull
-    @Override
-    Mono<Book> findById(@Nonnull Long id);
+@Repository
+public interface BookRepository extends ReactiveMongoRepository<Book, String> {
 }

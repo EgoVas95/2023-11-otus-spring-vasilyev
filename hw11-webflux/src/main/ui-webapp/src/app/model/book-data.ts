@@ -1,10 +1,10 @@
 import { Book } from "./book";
 
 export class BookData {
-  id?: number | undefined;
+  id?: string | undefined;
   title?: string | null;
-  authorId?: number | undefined;
-  genreId?: number | undefined;
+  authorId?: string | undefined;
+  genreId?: string | undefined;
 
   constructor(book: Book) {
     this.id = book.id;

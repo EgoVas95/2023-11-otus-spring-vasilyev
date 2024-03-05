@@ -1,11 +1,10 @@
 spring:
-  messages:
-    encoding: UTF-8
   data:
     mongodb:
       port: 27017
-      database: library
+      database: courses
       host: localhost
+      uri: mongodb://localhost:27017
 
 mongock:
   runner-type: initializingbean
@@ -15,7 +14,3 @@ mongock:
     write-concern:
       journal: false
     read-concern: local
-
-logging:
-  level:
-    ROOT: ERROR

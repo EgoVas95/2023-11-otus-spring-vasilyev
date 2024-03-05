@@ -18,44 +18,78 @@ import reactor.core.publisher.Mono;
 import ru.otus.hw.dto.BookCreateDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.services.BookServiceImpl;
+import ru.otus.hw.mappers.BookMapper;
+import ru.otus.hw.repositories.AuthorRepository;
+import ru.otus.hw.repositories.BookRepository;
+import ru.otus.hw.repositories.GenreRepository;
 
 @RestController
 @RequiredArgsConstructor
 public class BookController {
-    private final BookServiceImpl bookService;
+    private final BookRepository bookRepository;
+
+    private final BookMapper mapper;
+
+    private final AuthorRepository authorRepository;
+
+    private final GenreRepository genreRepository;
 
     @GetMapping("/api/books")
     public Flux<BookDto> allBooksList() {
-        return bookService.findAll();
+        return bookRepository.findAll()
+                .map(mapper::toDto);
     }
 
     @GetMapping("/api/books/{id}")
-    public Mono<ResponseEntity<BookDto>> getBook(@PathVariable(value = "id", required = false) Long id) {
-        return bookService.findById(id)
+    public Mono<ResponseEntity<BookDto>> getBook(@PathVariable(value = "id", required = false) String id) {
+        return bookRepository.findById(id)
+                .map(mapper::toDto)
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
     }
 
     @PatchMapping("/api/books/{id}")
-    public Mono<ResponseEntity<BookDto>> updateBook(@PathVariable("id") Long id,
-                              @Valid @RequestBody BookUpdateDto book) {
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public Mono<ResponseEntity<BookDto>> updateBook(@PathVariable("id") String id,
+                                                    @Valid @RequestBody BookUpdateDto book) {
         book.setId(id);
-        return bookService.update(book)
-                .map(dto -> new ResponseEntity<>(dto, HttpStatus.ACCEPTED))
-                .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
+
+        final String authorId = book.getAuthorId();
+        final String genreId = book.getGenreId();
+
+        return bookRepository.findById(id)
+                .flatMap(findedBook -> authorRepository.findById(authorId)
+                        .flatMap(author -> genreRepository.findById(genreId)
+                                .flatMap(genre -> bookRepository
+                                        .save(mapper.toModel(book, author, genre))
+                                )
+                                .map(getBook -> new ResponseEntity<>(mapper.toDto(getBook), HttpStatus.ACCEPTED))
+                                .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()))
+                        )
+                );
     }
 
     @PostMapping("/api/books")
+    @ResponseStatus(HttpStatus.CREATED)
     public Mono<ResponseEntity<BookDto>> createBook(@Valid @RequestBody BookCreateDto book) {
-        return bookService.create(book)
-                .map(dto -> new ResponseEntity<>(dto, HttpStatus.CREATED))
-                .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()));
+
+        final String authorId = book.getAuthorId();
+        final String genreId = book.getGenreId();
+
+        return authorRepository.findById(authorId)
+                .flatMap(author -> genreRepository.findById(genreId)
+                        .flatMap(genre -> bookRepository
+                                .save(mapper.toModel(book, author, genre))
+                        )
+                        .map(getBook -> new ResponseEntity<>(mapper.toDto(getBook), HttpStatus.CREATED))
+                        .switchIfEmpty(Mono.fromCallable(() -> ResponseEntity.notFound().build()))
+                );
     }
 
     @DeleteMapping("/api/books/{id}")
-    public Mono<ResponseEntity<Void>> deleteBook(@PathVariable("id") Long id) {
-        return bookService.deleteById(id)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<ResponseEntity<Void>> deleteBook(@PathVariable("id") String id) {
+        return bookRepository.deleteById(id)
                 .then(Mono.fromCallable(() -> new ResponseEntity<>(HttpStatus.NO_CONTENT)));
     }
 }
