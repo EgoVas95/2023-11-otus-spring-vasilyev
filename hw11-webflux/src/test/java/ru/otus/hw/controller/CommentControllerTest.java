@@ -2,10 +2,13 @@ package ru.otus.hw.controller;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,7 +32,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @DisplayName("Тестирование контроллера книг")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ExtendWith(SpringExtension.class)
+@Import(CommentMapper.class)
+@WebFluxTest(controllers = CommentController.class)
 class CommentControllerTest {
     private static final String FIRST_BOOK_ID = "1";
     private static final String FIRST_COMMENT_ID = "1";
@@ -145,7 +150,7 @@ class CommentControllerTest {
 
     @DisplayName("Ошибка при добавлении с невалидным text")
     @Test
-    void shouldThrowExAddInvalidText() throws Exception {
+    void shouldThrowExAddInvalidText() {
         Comment comment = getExampleOfCommentDto();
         CommentCreateDto createDto = new CommentCreateDto(null,
                 comment.getBook().getId());
