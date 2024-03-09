@@ -139,6 +139,7 @@
         <module>hw09-mvc</module>
         <module>hw10-singlepage_back</module>
         <module>hw11-webflux</module>
+        <module>hw12-ss_form_auth</module>
     </modules>
 
 </project>
