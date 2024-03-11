@@ -7,8 +7,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -40,21 +38,6 @@ public class SecurityConfiguration {
 
     @Bean
     public JdbcUserDetailsManager userDetailsManager(DataSource dataSource) {
-        UserDetails admin = User
-                .withUsername("admin")
-                .password(getPasswordEncoder().encode("admin"))
-                .roles("ADMIN", "USER")
-                .build();
-        UserDetails user = User
-                .withUsername("user")
-                .password(getPasswordEncoder().encode("user"))
-                .roles("USER")
-                .build();
-
-        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
-        manager.createUser(admin);
-        manager.createUser(user);
-        manager.setEnableGroups(false);
-        return manager;
+        return new JdbcUserDetailsManager(dataSource);
     }
 }

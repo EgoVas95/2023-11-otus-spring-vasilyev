@@ -6,7 +6,7 @@ import ru.otus.hw.models.User;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<User, Long> {
     @Nonnull
     Optional<User> findByUsername(String username);
 }

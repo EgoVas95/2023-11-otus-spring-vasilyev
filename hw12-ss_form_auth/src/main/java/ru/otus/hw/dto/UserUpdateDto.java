@@ -9,6 +9,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserUpdateDto {
+    @NotNull
+    private Long id;
+
     @NotBlank(message = "User username can't be null")
     @Size(min = 1, max = 100, message = "User username should be with " +
             "size from 1 to 100 symbols")

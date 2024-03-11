@@ -2,6 +2,7 @@ package ru.otus.hw.dto;
 
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
@@ -10,6 +11,9 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class UserDto {
+    @NotNull
+    private Long id;
+
     @NotBlank(message = "User username is can't be empty!")
     private String username;
 
