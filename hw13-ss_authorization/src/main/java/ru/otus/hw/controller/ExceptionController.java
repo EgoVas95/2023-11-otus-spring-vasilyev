@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 
+import org.springframework.security.access.AccessDeniedException;
+
 @ControllerAdvice
 public class ExceptionController {
 
@@ -17,6 +19,12 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public void handleEntityNotFoundEx(EntityNotFoundException ex) {
         logger.error("Entity not found", ex);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public void handleAccessDeniedException(AccessDeniedException ex) {
+        logger.error("Access denied", ex);
     }
 
     @ExceptionHandler(Exception.class)

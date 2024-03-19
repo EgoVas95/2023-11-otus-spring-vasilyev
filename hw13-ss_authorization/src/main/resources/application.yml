@@ -1,18 +1,6 @@
 spring:
   messages:
     encoding: UTF-8
-
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: 394792a2a0cc83a49389
-            client-secret: ae577c3c320919e839621e03e16299001da20609
-      resourceserver:
-        jwt:
-          public-key-location: app.pub
-
   datasource:
     url: jdbc:h2:mem:testdb
   sql:
@@ -22,14 +10,9 @@ spring:
   jpa:
     open-in-view: false
     generate-ddl: false
+    show-sql: true
     hibernate:
       ddl-auto: none
-
-    show-sql: true
-
-jwt:
-  private.key: classpath:app.key
-  public.key: classpath:app.pub
 
 logging:
   level:
