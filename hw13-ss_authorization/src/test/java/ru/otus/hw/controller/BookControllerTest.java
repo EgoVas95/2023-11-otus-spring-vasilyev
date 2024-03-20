@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.dto.AuthorDto;
@@ -13,10 +14,12 @@ import ru.otus.hw.dto.BookDto;
 import ru.otus.hw.dto.BookUpdateDto;
 import ru.otus.hw.dto.GenreDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.security.SecurityConfiguration;
 import ru.otus.hw.services.AuthorServiceImpl;
 import ru.otus.hw.services.BookServiceImpl;
 import ru.otus.hw.services.GenreServiceImpl;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
@@ -29,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Тестирование контроллера книг")
 @WebMvcTest(BookController.class)
+@Import(SecurityConfiguration.class)
 class BookControllerTest {
 
     private static final long FIRST_BOOK_ID = 1L;
@@ -39,6 +43,9 @@ class BookControllerTest {
     private MockMvc mvc;
 
     @MockBean
+    private DataSource dataSource;
+
+    @MockBean
     private BookServiceImpl bookService;
 
     @MockBean
@@ -46,6 +53,15 @@ class BookControllerTest {
 
     @MockBean
     private GenreServiceImpl genreService;
+
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/")
+                .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
 
     @DisplayName("Должен добавить новую книгу")
     @WithMockUser(

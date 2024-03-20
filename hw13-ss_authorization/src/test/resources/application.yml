@@ -1,7 +1,6 @@
 spring:
   messages:
     encoding: UTF-8
-
   datasource:
     url: jdbc:h2:mem:testdb
   sql:
