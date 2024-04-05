@@ -80,6 +80,7 @@
             <optional>true</optional>
             <version>${lombok.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -141,6 +142,7 @@
         <module>hw11-webflux</module>
         <module>hw12-ss_form_auth</module>
         <module>hw13-ss_authorization</module>
+        <module>hw14-spring_batch</module>
     </modules>
 
 </project>
