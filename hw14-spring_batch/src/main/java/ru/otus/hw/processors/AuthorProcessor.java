@@ -8,6 +8,6 @@ import ru.otus.hw.models.mongo.MongoAuthor;
 public class AuthorProcessor implements ItemProcessor<JpaAuthor, MongoAuthor> {
     @Override
     public MongoAuthor process(@Nonnull JpaAuthor item) throws Exception {
-        return new MongoAuthor(null, item.getFullName());
+        return new MongoAuthor(String.valueOf(item.getId()), item.getFullName());
     }
 }

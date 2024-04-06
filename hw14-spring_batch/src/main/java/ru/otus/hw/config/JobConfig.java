@@ -1,7 +1,6 @@
 package ru.otus.hw.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.core.ItemProcessListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -11,13 +10,11 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.lang.NonNull;
 import org.springframework.transaction.PlatformTransactionManager;
 import ru.otus.hw.models.jpa.JpaAuthor;
 import ru.otus.hw.models.jpa.JpaBook;
@@ -35,30 +32,25 @@ import ru.otus.hw.repositories.jpa.JpaAuthorRepository;
 import ru.otus.hw.repositories.jpa.JpaBookRepository;
 import ru.otus.hw.repositories.jpa.JpaCommentRepository;
 import ru.otus.hw.repositories.jpa.JpaGenreRepository;
-import ru.otus.hw.repositories.mongo.MongoBookRepository;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 @Configuration
 @EnableCaching
 @RequiredArgsConstructor
 public class JobConfig {
-    private static final int CHUNKSIZE = 5;
-
     public static final String MILLIS_PARAM_NAME = "currentTimeMillis";
 
     public static final String IMPORT_FROM_DATABASE_JOB_NAME = "importFromDatabaseJob";
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private static final int CHUNKSIZE = 5;
 
-    @Autowired
-    private JobRepository jobRepository;
+    private final MongoTemplate mongoTemplate;
 
-    @Autowired
-    private PlatformTransactionManager platformTransactionManager;
+    private final JobRepository jobRepository;
+
+    private final PlatformTransactionManager platformTransactionManager;
 
     private final JpaAuthorRepository jpaAuthorRepository;
 
@@ -68,9 +60,7 @@ public class JobConfig {
 
     private final JpaCommentRepository jpaCommentRepository;
 
-    private final MongoBookRepository mongoBookRepository;
-
-    private static final Map<String, Sort.Direction> SORTS_MAP =
+    private final Map<String, Sort.Direction> sortsMap =
             Collections.singletonMap("id", Sort.Direction.ASC);
 
     @StepScope
@@ -79,7 +69,7 @@ public class JobConfig {
         RepositoryItemReader<JpaAuthor> reader = new RepositoryItemReader<>();
         reader.setName("authorReader");
 
-        reader.setSort(SORTS_MAP);
+        reader.setSort(sortsMap);
         reader.setRepository(jpaAuthorRepository);
         reader.setMethodName("findAll");
         reader.setPageSize(CHUNKSIZE);
@@ -92,7 +82,7 @@ public class JobConfig {
         RepositoryItemReader<JpaGenre> reader = new RepositoryItemReader<>();
         reader.setName("genreReader");
 
-        reader.setSort(SORTS_MAP);
+        reader.setSort(sortsMap);
         reader.setRepository(jpaGenreRepository);
         reader.setMethodName("findAll");
         reader.setPageSize(CHUNKSIZE);
@@ -105,7 +95,7 @@ public class JobConfig {
         RepositoryItemReader<JpaBook> reader = new RepositoryItemReader<>();
         reader.setName("bookReader");
 
-        reader.setSort(SORTS_MAP);
+        reader.setSort(sortsMap);
         reader.setRepository(jpaBookRepository);
         reader.setMethodName("findAll");
         reader.setPageSize(CHUNKSIZE);
@@ -118,7 +108,7 @@ public class JobConfig {
         RepositoryItemReader<JpaComment> reader = new RepositoryItemReader<>();
         reader.setName("commentReader");
 
-        reader.setSort(SORTS_MAP);
+        reader.setSort(sortsMap);
         reader.setRepository(jpaCommentRepository);
         reader.setMethodName("findAll");
         reader.setPageSize(CHUNKSIZE);
@@ -242,18 +232,6 @@ public class JobConfig {
                 .reader(reader)
                 .processor(processor)
                 .writer(writer)
-                .listener(new ItemProcessListener<>() {
-                    @Override
-                    public void afterProcess(@NonNull JpaComment item, MongoComment result) {
-                        JpaBook jpaBook = item.getBook();
-                        String title = jpaBook.getTitle();
-                        List<MongoBook> books = mongoBookRepository.findByTitle(title);
-                        for (MongoBook book : books) {
-                            result.setBook(book);
-                            break;
-                        }
-                    }
-                })
                 .build();
     }
 }

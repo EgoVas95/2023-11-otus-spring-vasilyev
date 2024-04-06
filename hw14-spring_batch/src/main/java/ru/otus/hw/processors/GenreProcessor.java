@@ -9,6 +9,6 @@ public class GenreProcessor implements ItemProcessor<JpaGenre, MongoGenre> {
 
     @Override
     public MongoGenre process(@Nonnull JpaGenre item) throws Exception {
-        return new MongoGenre(null, item.getName());
+        return new MongoGenre(String.valueOf(item.getId()), item.getName());
     }
 }

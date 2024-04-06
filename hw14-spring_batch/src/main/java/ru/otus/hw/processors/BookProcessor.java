@@ -16,6 +16,6 @@ public class BookProcessor implements ItemProcessor<JpaBook, MongoBook> {
         GenreProcessor genreProcessor = new GenreProcessor();
         MongoGenre genre = genreProcessor.process(item.getGenre());
 
-        return new MongoBook(null, item.getTitle(), author, genre);
+        return new MongoBook(String.valueOf(item.getId()), item.getTitle(), author, genre);
     }
 }
