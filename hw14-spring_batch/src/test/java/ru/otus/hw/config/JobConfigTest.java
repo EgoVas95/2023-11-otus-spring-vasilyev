@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import ru.otus.hw.models.jpa.JpaAuthor;
 import ru.otus.hw.models.jpa.JpaBook;
 import ru.otus.hw.models.jpa.JpaComment;
@@ -55,9 +54,6 @@ class JobConfigTest {
     private JobRepositoryTestUtils jobRepositoryTestUtils;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
     private MongoBookRepository bookRepository;
 
     @Autowired
@@ -83,9 +79,6 @@ class JobConfigTest {
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
-        for (String name : mongoTemplate.getCollectionNames()) {
-            mongoTemplate.dropCollection(name);
-        }
     }
 
     @Test
@@ -95,8 +88,6 @@ class JobConfigTest {
         assertThat(job).isNotNull()
                 .extracting(Job::getName)
                 .isEqualTo(IMPORT_FROM_DATABASE_JOB_NAME);
-
-        mongoTemplate.getCollection("books");
 
         JobParameters parameters = new JobParametersBuilder()
                 .addLong(MILLIS_PARAM_NAME, System.currentTimeMillis())
