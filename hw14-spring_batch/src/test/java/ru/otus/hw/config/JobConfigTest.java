@@ -13,30 +13,16 @@ import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
-import ru.otus.hw.models.jpa.JpaAuthor;
-import ru.otus.hw.models.jpa.JpaBook;
-import ru.otus.hw.models.jpa.JpaComment;
-import ru.otus.hw.models.jpa.JpaGenre;
 import ru.otus.hw.models.mongo.MongoAuthor;
 import ru.otus.hw.models.mongo.MongoBook;
 import ru.otus.hw.models.mongo.MongoComment;
 import ru.otus.hw.models.mongo.MongoGenre;
-import ru.otus.hw.processors.AuthorProcessor;
-import ru.otus.hw.processors.BookProcessor;
-import ru.otus.hw.processors.CommentProcessor;
-import ru.otus.hw.processors.GenreProcessor;
-import ru.otus.hw.repositories.jpa.JpaAuthorRepository;
-import ru.otus.hw.repositories.jpa.JpaBookRepository;
-import ru.otus.hw.repositories.jpa.JpaGenreRepository;
 import ru.otus.hw.repositories.mongo.MongoAuthorRepository;
 import ru.otus.hw.repositories.mongo.MongoBookRepository;
 import ru.otus.hw.repositories.mongo.MongoCommentRepository;
 import ru.otus.hw.repositories.mongo.MongoGenreRepository;
 
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static ru.otus.hw.config.JobConfig.IMPORT_FROM_DATABASE_JOB_NAME;
@@ -65,17 +51,6 @@ class JobConfigTest {
     @Autowired
     private MongoCommentRepository commentRepository;
 
-
-
-    @Autowired
-    private JpaBookRepository jpaBookRepository;
-
-    @Autowired
-    private JpaGenreRepository jpaGenreRepository;
-
-    @Autowired
-    private JpaAuthorRepository jpaAuthorRepository;
-
     @BeforeEach
     void setUp() {
         jobRepositoryTestUtils.removeJobExecutions();
@@ -98,8 +73,7 @@ class JobConfigTest {
         assertThat(bookRepository.findAll())
                 .isNotEmpty()
                 .usingRecursiveComparison()
-                .isEqualTo(jpaBookRepository.findAll().stream()
-                        .map(this::process).toList());
+                .isEqualTo(getExampleBookList());
 
         assertThat(commentRepository.findAll())
                 .isNotEmpty()
@@ -109,71 +83,40 @@ class JobConfigTest {
         assertThat(authorRepository.findAll())
                 .isNotEmpty()
                 .usingRecursiveComparison()
-                .isEqualTo(StreamSupport.stream(
-                        jpaAuthorRepository.findAll(
-                                Sort.unsorted()).spliterator(), false)
-                        .map(this::process).toList());
+                .isEqualTo(getExampleAuthorList());
 
         assertThat(genreRepository.findAll())
                 .isNotEmpty()
                 .usingRecursiveComparison()
-                .isEqualTo(StreamSupport.stream(jpaGenreRepository.findAll(
-                        Sort.unsorted()).spliterator(), false)
-                        .map(this::process).toList());
+                .isEqualTo(getExampleGenreList());
     }
 
-    private MongoBook process(JpaBook book) {
-        BookProcessor processor = new BookProcessor();
-        try {
-            return processor.process(book);
-        } catch (Exception ex) {
-            return null;
-        }
+    private List<MongoAuthor> getExampleAuthorList() {
+        return List.of(new MongoAuthor("1", "Author_1"),
+                new MongoAuthor("2", "Author_2"),
+                new MongoAuthor("3", "Author_3"));
     }
-
-    private MongoComment process(JpaComment comment) {
-        CommentProcessor processor = new CommentProcessor();
-        try {
-            return processor.process(comment);
-        } catch (Exception ex) {
-            return null;
-        }
+    private List<MongoGenre> getExampleGenreList() {
+        return List.of(new MongoGenre("1", "Genre_1"),
+                new MongoGenre("2", "Genre_2"),
+                new MongoGenre("3", "Genre_3"));
     }
+    private List<MongoBook> getExampleBookList() {
+        List<MongoGenre> genreList = getExampleGenreList();
+        List<MongoAuthor> authorList = getExampleAuthorList();
 
-    private MongoAuthor process(JpaAuthor author) {
-        AuthorProcessor processor = new AuthorProcessor();
-        try {
-            return processor.process(author);
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-    private MongoGenre process(JpaGenre genre) {
-        GenreProcessor processor = new GenreProcessor();
-        try {
-            return processor.process(genre);
-        } catch (Exception ex) {
-            return null;
-        }
+        return List.of(new MongoBook("1", "BookTitle_1", authorList.get(0), genreList.get(0)),
+                new MongoBook("2", "BookTitle_2", authorList.get(1), genreList.get(1)),
+                new MongoBook("3", "BookTitle_3", authorList.get(2), genreList.get(2)));
     }
 
     private List<MongoComment> getExampleCommentList() {
-        JpaBook book1 = new JpaBook(1L, "BookTitle_1",
-                new JpaAuthor(1L, "Author_1"),
-                new JpaGenre(1L, "Genre_1"));
-        JpaBook book2 = new JpaBook(2L, "BookTitle_2",
-                new JpaAuthor(2L, "Author_2"),
-                new JpaGenre(2L, "Genre_2"));
-        JpaBook book3 = new JpaBook(3L, "BookTitle_3",
-                new JpaAuthor(3L, "Author_3"),
-                new JpaGenre(3L, "Genre_3"));
+        List<MongoBook> bookList = getExampleBookList();
 
-        return Stream.of(new JpaComment(1L, "Book_1_Comment_1", book1),
-                        new JpaComment(2L, "Book_1_Comment_2", book1),
-                        new JpaComment(3L, "Book_1_Comment_3", book1),
-                        new JpaComment(4L, "Book_2_Comment_1", book2),
-                        new JpaComment(5L, "Book_3_Comment_1", book3))
-                .map(this::process).toList();
+        return List.of(new MongoComment("1", "Book_1_Comment_1", bookList.get(0)),
+                new MongoComment("2", "Book_1_Comment_2", bookList.get(0)),
+                new MongoComment("3", "Book_1_Comment_3", bookList.get(0)),
+                new MongoComment("4", "Book_2_Comment_1", bookList.get(1)),
+                new MongoComment("5", "Book_3_Comment_1", bookList.get(2)));
     }
 }
