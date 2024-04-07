@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.MessageChannelSpec;
 import org.springframework.integration.dsl.MessageChannels;
-import ru.otus.hw.domain.FinishedBuild;
 import ru.otus.hw.services.BuildService;
 import ru.otus.hw.services.InhabitateService;
 import ru.otus.hw.services.PrepareBuildService;
