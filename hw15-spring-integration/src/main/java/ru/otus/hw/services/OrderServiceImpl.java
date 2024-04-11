@@ -25,8 +25,9 @@ public class OrderServiceImpl implements OrderService, CommandLineRunner {
 
     @Override
     public void startGenerateOrdersLoop() {
-        try (ForkJoinPool pool = ForkJoinPool.commonPool();
-             Closeable ignored = pool::shutdown) {
+        ForkJoinPool pool = ForkJoinPool.commonPool();
+
+        try (Closeable ignored = pool::shutdown) {
             for (int i = 0; i < 1; i++) {
                 int num = i + 1;
                 pool.execute(() -> {
@@ -75,7 +76,7 @@ public class OrderServiceImpl implements OrderService, CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         startGenerateOrdersLoop();
     }
 }
