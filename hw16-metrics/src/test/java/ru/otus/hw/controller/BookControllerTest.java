@@ -15,7 +15,6 @@ import ru.otus.hw.services.GenreServiceImpl;
 import java.util.List;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -41,6 +40,12 @@ class BookControllerTest {
 
     @MockBean
     private GenreServiceImpl genreService;
+
+    @Test
+    void shouldOkForActuator() throws Exception {
+        mvc.perform(get("/actuator"))
+                .andExpect(status().isOk());
+    }
 
     @DisplayName("Должен добавить новую книгу")
     @Test
