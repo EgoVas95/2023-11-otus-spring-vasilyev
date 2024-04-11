@@ -2,6 +2,7 @@ package ru.otus.hw.services;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import ru.otus.hw.domain.BuildOrder;
 import ru.otus.hw.domain.FoundationTypes;
@@ -18,14 +19,14 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class OrderServiceImp implements OrderService {
+public class OrderServiceImpl implements OrderService, CommandLineRunner {
 
     private final BuildServiceGateway build;
 
     @Override
     public void startGenerateOrdersLoop() {
-        ForkJoinPool pool = ForkJoinPool.commonPool();
-        try (Closeable ignored = pool::shutdown) {
+        try (ForkJoinPool pool = ForkJoinPool.commonPool();
+             Closeable ignored = pool::shutdown) {
             for (int i = 0; i < 1; i++) {
                 int num = i + 1;
                 pool.execute(() -> {
@@ -71,5 +72,10 @@ public class OrderServiceImp implements OrderService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        startGenerateOrdersLoop();
     }
 }

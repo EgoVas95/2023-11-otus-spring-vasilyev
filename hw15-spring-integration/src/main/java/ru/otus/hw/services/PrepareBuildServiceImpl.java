@@ -7,7 +7,7 @@ import ru.otus.hw.domain.PrepareBuildResult;
 
 @Service
 @Slf4j
-public class PrepareBuildServiceImp implements PrepareBuildService {
+public class PrepareBuildServiceImpl implements PrepareBuildService {
     @Override
     public PrepareBuildResult prepare(BuildingResult result) {
         log.info("Prepare build {}", result.toString());
