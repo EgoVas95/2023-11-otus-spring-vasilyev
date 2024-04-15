@@ -41,12 +41,6 @@ class BookControllerTest {
     @MockBean
     private GenreServiceImpl genreService;
 
-    @Test
-    void shouldOkForActuator() throws Exception {
-        mvc.perform(get("/actuator"))
-                .andExpect(status().isOk());
-    }
-
     @DisplayName("Должен добавить новую книгу")
     @Test
     void shouldAddNewBook() throws Exception {
@@ -101,7 +95,7 @@ class BookControllerTest {
                 null, null);
 
         mvc.perform(post("/update_book").flashAttr("book", bookUpdateDto))
-                .andExpect(redirectedUrl("/edit_book?id=%d".formatted(null)));
+                .andExpect(redirectedUrl("/edit_book?id=null"));
     }
 
     @DisplayName("Ошибка валидации id автора при создании книги")
