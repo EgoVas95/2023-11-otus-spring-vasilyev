@@ -143,6 +143,7 @@
         <module>hw13-ss_authorization</module>
         <module>hw14-spring_batch</module>
         <module>hw15-spring-integration</module>
+        <module>hw17-docker</module>
     </modules>
 
 </project>
