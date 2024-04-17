@@ -7,10 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.dto.BookDto;
-import ru.otus.hw.services.BookService;
-
-import java.util.List;
+import ru.otus.hw.repositories.BookRepository;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,12 +23,11 @@ class ActuatorTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private BookService bookService;
+    private BookRepository bookRepository;
 
     @Test
     void shouldBeOkWhenThereAreBooks() throws Exception {
-        when(bookService.findAll()).thenReturn(
-                List.of(new BookDto(1L, "Book 1", null, null)));
+        when(bookRepository.count()).thenReturn(2L);
 
         mockMvc.perform(get("/actuator"))
                 .andExpect(status().isOk());
