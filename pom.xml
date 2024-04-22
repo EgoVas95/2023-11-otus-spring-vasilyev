@@ -144,6 +144,7 @@
         <module>hw14-spring_batch</module>
         <module>hw15-spring-integration</module>
         <module>hw16-metrics</module>
+        <module>hw17-docker</module>
     </modules>
 
 </project>
