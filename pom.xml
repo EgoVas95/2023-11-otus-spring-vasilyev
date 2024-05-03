@@ -145,6 +145,7 @@
         <module>hw15-spring-integration</module>
         <module>hw16-metrics</module>
         <module>hw17-docker</module>
+        <module>hw18-hystrix</module>
     </modules>
 
 </project>
