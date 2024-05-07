@@ -31,7 +31,7 @@ resilience4j:
         slowCallDurationThreshold: 2s
         slowCallRateThreshold: 10
         failureRateThreshold: 3
-        waitDurationInOpenState: 10s
+        waitDurationInOpenState: 2s
         minimumNumberOfCalls: 3
 management:
   endpoint:
