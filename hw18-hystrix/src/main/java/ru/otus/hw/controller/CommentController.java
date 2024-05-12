@@ -39,14 +39,12 @@ public class CommentController {
         return commentService.findById(commentId);
     }
 
-    @CircuitBreaker(name = "commentBreaker", fallbackMethod = "createUpdateFallback")
     @PostMapping("/api/comments")
     @ResponseStatus(value = HttpStatus.CREATED)
     public CommentDto addCommentForBook(@Valid @RequestBody CommentCreateDto dto) {
         return commentService.create(dto);
     }
 
-    @CircuitBreaker(name = "commentBreaker", fallbackMethod = "createUpdateFallback")
     @PatchMapping("/api/comments/{comment_id}")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
     public CommentDto updateComment(@PathVariable("comment_id") Long commentId,
@@ -55,33 +53,19 @@ public class CommentController {
         return commentService.update(dto);
     }
 
-    @CircuitBreaker(name = "commentBreaker", fallbackMethod = "deleteFallback")
     @DeleteMapping("/api/comments/{comment_id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable("comment_id") Long commentId) {
         commentService.deleteById(commentId);
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public CommentDto unknownCommentServiceFallback(Exception ex) {
         log.error(ex.getMessage(), ex);
         return new CommentDto(null, "NaN", null);
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public List<CommentDto> unknownCommentListFallback(Exception ex) {
         log.error(ex.getMessage(), ex);
         return new ArrayList<>();
-    }
-
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public String createUpdateFallback(Exception ex) {
-        log.error(ex.getMessage(), ex);
-        return ex.getMessage();
-    }
-
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public void deleteFallback(Exception ex) {
-        log.error(ex.getMessage(), ex);
     }
 }

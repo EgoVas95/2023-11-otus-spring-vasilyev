@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import ru.otus.hw.dto.*;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.services.AuthorServiceImpl;
@@ -69,6 +70,13 @@ class BookControllerTest {
         mvc.perform(get("/api/books/%d".formatted(bookDto.getId())))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(bookDto)));
+    }
+
+    @DisplayName("Должен отработать fallback по получению книги")
+    @Test
+    void fallbackForGetBook() throws Exception {
+        mvc.perform(get("/api/books/%d".formatted(-1L)))
+                .andExpect(status().isOk());
     }
 
     @DisplayName("Должен вернуться ошибка при поиске книги")
