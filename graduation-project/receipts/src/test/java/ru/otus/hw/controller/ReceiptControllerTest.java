@@ -8,8 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.otus.hw.configurations.KeycloakLogoutHandler;
+import ru.otus.hw.configurations.SecurityConfig;
 import ru.otus.hw.dto.food.FoodDto;
 import ru.otus.hw.dto.receipt.ReceiptCreateDto;
 import ru.otus.hw.dto.receipt.ReceiptDto;
@@ -22,6 +26,7 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -32,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер рецептов")
 @WebMvcTest(ReceiptController.class)
+@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class ReceiptControllerTest {
 
     private static final long FIRST_ID = 1L;
@@ -45,7 +51,19 @@ class ReceiptControllerTest {
     @MockBean
     private ReceiptServiceImpl service;
 
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/api/receipts")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
     @DisplayName("Получить все рецепты")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findAll() throws Exception {
         val expect = getExampleList();
@@ -56,6 +74,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Получить рецепта по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findById() throws Exception {
         val dto = getDto();
@@ -68,6 +90,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при получении рецепта по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByIdWithException() throws Exception {
         given(service.findById(any()))
@@ -78,6 +104,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Получить рецепты по foodId")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByFoodId() throws Exception {
         val expect = getExampleList();
@@ -90,6 +120,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Добавление нового рецепта")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void create() throws Exception {
         val dto = getDto();
@@ -104,6 +138,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового рецепта с foodId = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithFoodIdNull() throws Exception {
         val dto = getDto();
@@ -116,6 +154,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового рецепта с instruction = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithInstructionNull() throws Exception {
         val dto = getDto();
@@ -128,6 +170,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Изменение рецепта")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void update() throws Exception {
         val dto = getDto();
@@ -144,6 +190,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при изменении рецепта с id = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
@@ -157,6 +207,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при изменении рецепта с foodId = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithFoodIdNull() throws Exception {
         val dto = getDto();
@@ -170,6 +224,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Ошибка при изменении рецепта с instruction = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithInstructionNull() throws Exception {
         val dto = getDto();
@@ -183,6 +241,10 @@ class ReceiptControllerTest {
     }
 
     @DisplayName("Удаление рецепта")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void deleteEx() throws Exception {
         mvc.perform(delete("/api/receipts/%d".formatted(getDto().getId())))

@@ -1,8 +1,28 @@
+server:
+  port: 8080
+
 spring:
   messages:
     encoding: UTF-8
   application:
     name: receipts
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: product_client
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8484/realms/product_realm
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8484/realms/product_realm
 
   datasource:
     url: jdbc:h2:mem:testdb

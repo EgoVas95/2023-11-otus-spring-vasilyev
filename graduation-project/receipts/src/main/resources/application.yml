@@ -1,24 +1,42 @@
+server:
+  port: 8080
+
 spring:
-  messages:
-    encoding: UTF-8
   application:
     name: receipts
+  messages:
+    encoding: UTF-8
+
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: product_client
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8484/realms/product_realm
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8484/realms/product_realm
 
   datasource:
-    url: jdbc:postgresql://localhost:15432/db
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:15432/productsDb
+    username: productUser
+    password: prodPwdDb
   sql:
     init:
-      mode: always
-      data-locations: data.sql
+      mode: never
 
   jpa:
     open-in-view: false
     generate-ddl: false
     hibernate:
       ddl-auto: none
-
     show-sql: true
 
 logging:

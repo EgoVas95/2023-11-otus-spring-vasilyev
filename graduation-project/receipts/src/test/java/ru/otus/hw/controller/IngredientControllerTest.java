@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.otus.hw.configurations.KeycloakLogoutHandler;
+import ru.otus.hw.configurations.SecurityConfig;
 import ru.otus.hw.dto.food.FoodDto;
 import ru.otus.hw.dto.ingredient.IngredientCreateDto;
 import ru.otus.hw.dto.ingredient.IngredientDto;
@@ -24,6 +28,7 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -34,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер ингредиентов")
 @WebMvcTest(IngredientController.class)
+@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class IngredientControllerTest {
     private static final long FIRST_ID = 1L;
 
@@ -46,7 +52,19 @@ class IngredientControllerTest {
     @MockBean
     private IngredientServiceImpl service;
 
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/api/ingredients")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
     @DisplayName("Получить все ингредиенты")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findAll() throws Exception {
         val expect = getExampleList();
@@ -57,6 +75,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Получить ингредиент по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findById() throws Exception {
         val dto = getDto();
@@ -69,6 +91,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при получении ингредиента по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByIdWithException() throws Exception {
         given(service.findById(any()))
@@ -79,6 +105,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Получить ингредиенты по receiptId")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByReceiptId() throws Exception {
         val expect = getExampleList();
@@ -91,6 +121,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Добавление нового ингредиента")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void create() throws Exception {
         val dto = getDto();
@@ -106,6 +140,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового ингредиента с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithReceiptNull() throws Exception {
         val dto = getDto();
@@ -119,6 +157,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового ингредиента с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithServingNull() throws Exception {
         val dto = getDto();
@@ -132,6 +174,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового ингредиента с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithQuantityNull() throws Exception {
         val dto = getDto();
@@ -145,6 +191,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Изменение ингредиента")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void update() throws Exception {
         val dto = getDto();
@@ -161,6 +211,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при изменении ингредиента с id = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
@@ -174,6 +228,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при изменении ингредиента с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithReceiptNull() throws Exception {
         val dto = getDto();
@@ -187,6 +245,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при изменении ингредиента с serving = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithServingNull() throws Exception {
         val dto = getDto();
@@ -200,6 +262,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Ошибка при изменении ингредиента с quantity = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithQuantityNull() throws Exception {
         val dto = getDto();
@@ -213,6 +279,10 @@ class IngredientControllerTest {
     }
 
     @DisplayName("Удаление ингредиента")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void deleteEx() throws Exception {
         mvc.perform(delete("/api/ingredients/%d".formatted(getDto().getId())))

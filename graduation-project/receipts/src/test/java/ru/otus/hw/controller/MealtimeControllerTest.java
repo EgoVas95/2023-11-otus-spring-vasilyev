@@ -8,8 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.otus.hw.configurations.KeycloakLogoutHandler;
+import ru.otus.hw.configurations.SecurityConfig;
 import ru.otus.hw.dto.mealtime.MealtimeTypeCreateDto;
 import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
 import ru.otus.hw.dto.mealtime.MealtimeTypeUpdateDto;
@@ -20,6 +24,7 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -30,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер приёмов пищи")
 @WebMvcTest(MealtimeController.class)
+@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class MealtimeControllerTest {
 
     private static final long FIRST_ID = 1L;
@@ -43,7 +49,19 @@ class MealtimeControllerTest {
     @MockBean
     private MealtimeTypeServiceImpl service;
 
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/api/mealtimes")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
     @DisplayName("Получить все приёмы пищи")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findAll() throws Exception {
         val expect = getExampleList();
@@ -54,6 +72,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Получить приём пищи по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findById() throws Exception {
         val dto = getDto();
@@ -66,6 +88,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Получить приёмы пищи по name")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByName() throws Exception {
         val expect = getDto();
@@ -78,6 +104,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Добавление нового приёма пищи")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void create() throws Exception {
         val dto = getDto();
@@ -92,6 +122,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового приёма пищи с name = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithNameNull() throws Exception {
         val createDto = new MealtimeTypeCreateDto(null,
@@ -104,6 +138,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Изменение приёма пищи")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void update() throws Exception {
         val dto = getDto();
@@ -120,6 +158,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Ошибка при изменении приёма пищи с serving = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
@@ -133,6 +175,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Ошибка при изменении приёма пищи с quantity = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithNameNull() throws Exception {
         val dto = getDto();
@@ -146,6 +192,10 @@ class MealtimeControllerTest {
     }
 
     @DisplayName("Удаление приёма пищи")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void deleteEx() throws Exception {
         mvc.perform(delete("/api/mealtimes/%d".formatted(getDto().getId())))

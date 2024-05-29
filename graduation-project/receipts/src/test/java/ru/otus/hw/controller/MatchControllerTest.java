@@ -8,8 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.otus.hw.configurations.KeycloakLogoutHandler;
+import ru.otus.hw.configurations.SecurityConfig;
 import ru.otus.hw.dto.food.FoodDto;
 import ru.otus.hw.dto.match.MatchMealtimeAndReceiptCreateDto;
 import ru.otus.hw.dto.match.MatchMealtimeAndReceiptDto;
@@ -24,6 +28,7 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -34,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер совпадений")
 @WebMvcTest(MatchController.class)
+@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class MatchControllerTest {
 
     private static final long FIRST_ID = 1L;
@@ -47,7 +53,19 @@ class MatchControllerTest {
     @MockBean
     private MatchMealtimeAndReceiptServiceImpl service;
 
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/api/matches")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
     @DisplayName("Получить все совпадения")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findAll() throws Exception {
         val expect = getExampleList();
@@ -58,6 +76,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Получить совпадениe по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findById() throws Exception {
         val dto = getDto();
@@ -70,6 +92,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при получении совпадения по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByIdWithException() throws Exception {
         given(service.findById(any()))
@@ -80,6 +106,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Получить совпадениe по receiptId")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByReceiptId() throws Exception {
         val expect = getExampleList();
@@ -92,6 +122,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Получить совпадениe по mealtimeId")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByMealtimeId() throws Exception {
         val expect = getExampleList();
@@ -104,6 +138,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Добавление нового совпадения")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void create() throws Exception {
         val dto = getDto();
@@ -117,6 +155,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового совпадения с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithReceiptNull() throws Exception {
         val dto = getDto();
@@ -131,6 +173,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении нового совпадения с mealtime = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithMealtimeNull() throws Exception {
         val dto = getDto();
@@ -145,6 +191,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Изменение совпадения")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void update() throws Exception {
         val dto = getDto();
@@ -162,6 +212,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при изменении совпадения с id = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
@@ -176,6 +230,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при изменении совпадения с receipt = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithReceiptNull() throws Exception {
         val dto = getDto();
@@ -190,6 +248,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Ошибка при изменении совпадения с mealtime = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithMealtimeNull() throws Exception {
         val dto = getDto();
@@ -204,6 +266,10 @@ class MatchControllerTest {
     }
 
     @DisplayName("Удаление совпадения")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void deleteEx() throws Exception {
         mvc.perform(delete("/api/matches/%d".formatted(getDto().getId())))

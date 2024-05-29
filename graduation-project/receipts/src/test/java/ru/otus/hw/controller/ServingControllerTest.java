@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.otus.hw.configurations.KeycloakLogoutHandler;
+import ru.otus.hw.configurations.SecurityConfig;
 import ru.otus.hw.dto.food.FoodDto;
 import ru.otus.hw.dto.serving.ServingCreateDto;
 import ru.otus.hw.dto.serving.ServingDto;
@@ -22,6 +26,7 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -32,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер порций")
 @WebMvcTest(ServingController.class)
+@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class ServingControllerTest {
     private static final long FIRST_ID = 1L;
 
@@ -44,7 +50,19 @@ class ServingControllerTest {
     @MockBean
     private ServingServiceImpl service;
 
+    @DisplayName("Должен вернуть редирект на страницу login")
+    @Test
+    void shouldReturnRedirectToLoginPage() throws Exception {
+        mvc.perform(get("/api/servings")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
     @DisplayName("Получить все порции")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findAll() throws Exception {
         val expect = getExampleList();
@@ -55,6 +73,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Получить порцию по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findById() throws Exception {
         val dto = getDto();
@@ -67,6 +89,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при получении порции по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByIdWithException() throws Exception {
         given(service.findById(any()))
@@ -77,6 +103,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Получить порции с foodId")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByFoodId() throws Exception {
         val expect = getExampleList();
@@ -89,6 +119,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при получении порции по id")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByName() throws Exception {
         val expect = getExampleList();
@@ -101,6 +135,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Получить порции с калориями меньше или равными")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void findByLessOrEqThan() throws Exception {
         val expect = getExampleList();
@@ -113,6 +151,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Добавление новой порции")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void create() throws Exception {
         val dto = getDto();
@@ -129,6 +171,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с name = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithNameNull() throws Exception {
         val dto = getDto();
@@ -143,6 +189,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с food = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithFoodNull() throws Exception {
         val dto = getDto();
@@ -157,6 +207,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с calories < 0>")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithCaloriesNegative() throws Exception {
         val dto = getDto();
@@ -171,6 +225,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с calories = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithCaloriesNull() throws Exception {
         val dto = getDto();
@@ -185,6 +243,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с proteins < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithProteinsNegative() throws Exception {
         val dto = getDto();
@@ -199,6 +261,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с proteins = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithProteinsNull() throws Exception {
         val dto = getDto();
@@ -213,6 +279,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с fats < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithFatsNegative() throws Exception {
         val dto = getDto();
@@ -227,6 +297,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с fats = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithFatsNull() throws Exception {
         val dto = getDto();
@@ -241,6 +315,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с carbohydrates < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithCarbohydratesNegative() throws Exception {
         val dto = getDto();
@@ -255,6 +333,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при добавлении новой порции с carbohydrates = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void createExceptionWithCarbohydratesNull() throws Exception {
         val dto = getDto();
@@ -269,6 +351,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Изменение порции")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void update() throws Exception {
         val dto = getDto();
@@ -286,6 +372,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с id = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
@@ -300,6 +390,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с name = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithNameNull() throws Exception {
         val dto = getDto();
@@ -314,6 +408,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с food = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithFoodNull() throws Exception {
         val dto = getDto();
@@ -328,6 +426,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с calories < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithCaloriesNegative() throws Exception {
         val dto = getDto();
@@ -342,6 +444,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с calories = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithCaloriesNull() throws Exception {
         val dto = getDto();
@@ -356,6 +462,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с proteins < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithProteinsNegative() throws Exception {
         val dto = getDto();
@@ -370,6 +480,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с proteins = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithProteinsNull() throws Exception {
         val dto = getDto();
@@ -384,6 +498,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с fats < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithFatsNegative() throws Exception {
         val dto = getDto();
@@ -398,6 +516,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с fats = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithFatsNull() throws Exception {
         val dto = getDto();
@@ -412,6 +534,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с carbohydrates < 0")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithCarbohydratesNegative() throws Exception {
         val dto = getDto();
@@ -426,6 +552,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Ошибка при изменении порции с carbohydrates = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void updateExceptionWithCarbohydratesNull() throws Exception {
         val dto = getDto();
@@ -440,6 +570,10 @@ class ServingControllerTest {
     }
 
     @DisplayName("Удаление порции")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
     @Test
     void deleteEx() throws Exception {
         mvc.perform(delete("/api/servings/%d".formatted(getDto().getId())))
