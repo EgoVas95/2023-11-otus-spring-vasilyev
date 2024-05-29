@@ -30,6 +30,7 @@ spring:
     init:
       mode: always
       data-locations: data.sql
+      schema-locations: schema.sql
 
   jpa:
     open-in-view: false
