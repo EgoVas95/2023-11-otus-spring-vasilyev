@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.2.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -33,6 +33,9 @@
         <checkstyle.config.url>
             https://raw.githubusercontent.com/OtusTeam/Spring/master/checkstyle.xml
         </checkstyle.config.url>
+
+        <java.version>17</java.version>
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
     </properties>
     <dependencies>
         <dependency>
@@ -148,7 +151,9 @@
         <module>hw18-hystrix</module>
 
         <module>graduation-project/receipts</module>
-        <module>graduation-project/security-server</module>
+        <module>graduation-project/meal-configurator</module>
+        <module>graduation-project/eureka-server</module>
+        <module>graduation-project/meals-bot</module>
     </modules>
 
 </project>

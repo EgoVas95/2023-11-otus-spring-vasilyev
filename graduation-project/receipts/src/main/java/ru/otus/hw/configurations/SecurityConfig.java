@@ -71,7 +71,6 @@ public class SecurityConfig {
                 }))
                 // Настройка доступа к конечным точкам
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAuthority("PRODUCT_read")
                         .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority("PRODUCT_write")
                         .requestMatchers(HttpMethod.PATCH, "/api/**").hasAuthority("PRODUCT_write")

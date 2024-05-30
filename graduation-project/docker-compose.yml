@@ -1,14 +1,15 @@
 version: '3.9'
 services:
   postgres:
-    image: "postgres:16.3-alpine3.20"
+    image: "postgres"
     ports:
       - "15432:5432"
     environment:
-      POSTGRES_MULTIPLE_DATABASES: productsDb, keycloakDb
+      POSTGRES_DB: productsDb
       POSTGRES_USER: productUser
       POSTGRES_PASSWORD: prodPwdDb
     volumes:
+      - ./db-data/:/var/lib/postgresql/data/
       - /receipts/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U productUser -d productsDb"]
@@ -21,43 +22,8 @@ services:
       resources:
         limits:
           memory: 2G
-
-  pgadmin:
-    container_name: pgadmin_container
-    image: dpage/pgadmin4
-    depends_on:
-      - postgres
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "root"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "5050:80"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 1G
-
-  postgres_exporter:
-    depends_on:
-      - pgadmin
-    container_name: exporter_container
-    image: prometheuscommunity/postgres-exporter:v0.10.1
-    environment:
-      DATA_SOURCE_URI: "postgres:15432/productsDb?sslmode=disable"
-      DATA_SOURCE_USER: "productUser"
-      DATA_SOURCE_PASS: "prodPwdDb"
-      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
-    ports:
-      - "9187:9187"
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 500M
+    networks:
+      - product-network
 
   keycloak:
     image: bitnami/keycloak
@@ -68,26 +34,40 @@ services:
       DB_DATABASE: productsDb
       DB_USER: productUser
       DB_PASSWORD: prodPwdDb
-      KEYCLOAK_HTTP_PORT: 8888
+      KEYCLOAK_HTTP_PORT: 8484
       KEYCLOAK_ADMIN: user
       KEYCLOAK_ADMIN_PASSWORD: bitnami
     ports:
-      - "8484:8888"
+      - "8484:8484"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/
+    restart: always
     depends_on:
       - postgres
     links:
       - "postgres:postgres"
+    networks:
+      - product-network
 
   products_app:
     build:
       context: receipts
       dockerfile: Dockerfile
     ports:
-      - "9880:8080"
+      - "9880:8181"
     depends_on:
+      - postgres
       - keycloak
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/productsDb
       - SPRING_DATASOURCE_USERNAME=productUser
       - SPRING_DATASOURCE_PASSWORD=prodPwdDb
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI=http://keycloak:8484/realms/product_realm
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_KEYCLOAK_ISSUER=http://keycloak:8484/realms/product_realm
+    networks:
+      - product-network
+
+networks:
+  product-network:
+    driver: bridge
 
