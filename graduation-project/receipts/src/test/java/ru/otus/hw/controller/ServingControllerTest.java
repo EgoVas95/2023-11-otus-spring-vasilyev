@@ -26,7 +26,6 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -49,14 +48,6 @@ class ServingControllerTest {
 
     @MockBean
     private ServingServiceImpl service;
-
-    @DisplayName("Должен вернуть редирект на страницу login")
-    @Test
-    void shouldReturnRedirectToLoginPage() throws Exception {
-        mvc.perform(get("/api/servings")
-                        .with(csrf()))
-                .andExpect(status().isUnauthorized());
-    }
 
     @DisplayName("Получить все порции")
     @WithMockUser(

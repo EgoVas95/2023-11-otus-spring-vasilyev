@@ -6,8 +6,6 @@ import ru.otus.hw.dto.calories.CaloriesTypeDto;
 import ru.otus.hw.dto.diets.DietTypeDto;
 import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 public class MealDto {

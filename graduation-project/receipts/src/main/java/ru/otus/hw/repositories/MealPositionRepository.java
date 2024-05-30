@@ -3,7 +3,6 @@ package ru.otus.hw.repositories;
 import jakarta.annotation.Nonnull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.otus.hw.models.Meal;
 import ru.otus.hw.models.MealPosition;
 
 import java.util.List;
@@ -22,5 +21,5 @@ public interface MealPositionRepository extends JpaRepository<MealPosition, Long
 
     @Nonnull
     @EntityGraph("meal-graph")
-    List<MealPosition> findAllByMeal(@Nonnull Meal meal);
+    List<MealPosition> findAllByMealId(@Nonnull Long id);
 }

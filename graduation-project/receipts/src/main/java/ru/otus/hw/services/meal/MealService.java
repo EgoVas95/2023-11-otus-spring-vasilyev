@@ -1,18 +1,15 @@
 package ru.otus.hw.services.meal;
 
-import ru.otus.hw.dto.calories.CaloriesTypeDto;
-import ru.otus.hw.dto.diets.DietTypeDto;
 import ru.otus.hw.dto.meal.MealCreateDto;
 import ru.otus.hw.dto.meal.MealDto;
 import ru.otus.hw.dto.meal.MealUpdateDto;
-import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
 
 import java.util.List;
 
 public interface MealService {
-    List<MealDto> findAllByMealtimeTypeAndDietTypesContainsAndCaloriesTypesContains(
-            MealtimeTypeDto mealtimeTypeDto, DietTypeDto dietTypeDto,
-            CaloriesTypeDto caloriesTypeDto);
+    List<MealDto> findAllBySeveralParams(Long mealtimeTypeId,
+                                         Long dietTypeId,
+                                         Long caloriesTypeId);
 
     MealDto findById(Long id);
 

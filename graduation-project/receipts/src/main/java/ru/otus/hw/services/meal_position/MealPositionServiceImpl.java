@@ -3,12 +3,10 @@ package ru.otus.hw.services.meal_position;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.meal.MealDto;
 import ru.otus.hw.dto.meal_positions.MealPositionCreateDto;
 import ru.otus.hw.dto.meal_positions.MealPositionDto;
 import ru.otus.hw.dto.meal_positions.MealPositionUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.mappers.MealMapper;
 import ru.otus.hw.mappers.MealPositionMapper;
 import ru.otus.hw.repositories.MealPositionRepository;
 import ru.otus.hw.repositories.MealRepository;
@@ -23,8 +21,6 @@ public class MealPositionServiceImpl implements MealPositionService {
 
     private final MealPositionMapper mapper;
 
-    private final MealMapper mealMapper;
-
     private final MealPositionRepository repository;
 
     private final MealRepository mealRepository;
@@ -32,8 +28,8 @@ public class MealPositionServiceImpl implements MealPositionService {
     private final ServingRepository servingRepository;
 
     @Override
-    public List<MealPositionDto> findAllByMeal(MealDto mealDto) {
-        return repository.findAllByMeal(mealMapper.toModel(mealDto))
+    public List<MealPositionDto> findAllByMealId(Long mealId) {
+        return repository.findAllByMealId(mealId)
                 .stream().map(mapper::toDto)
                 .collect(Collectors.toList());
     }

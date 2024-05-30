@@ -1,34 +1,34 @@
-package ru.otus.hw.services.diet;
+package ru.otus.hw.services.calories;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.diets.DietTypeCreateDto;
-import ru.otus.hw.dto.diets.DietTypeDto;
-import ru.otus.hw.dto.diets.DietTypeUpdateDto;
+import ru.otus.hw.dto.calories.CaloriesTypeCreateDto;
+import ru.otus.hw.dto.calories.CaloriesTypeDto;
+import ru.otus.hw.dto.calories.CaloriesTypeUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.mappers.DietTypeMapper;
-import ru.otus.hw.repositories.DietTypeRepository;
+import ru.otus.hw.mappers.CaloriesTypeMapper;
+import ru.otus.hw.repositories.CaloriesTypeRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class DietServiceImpl implements DietService {
-    private final DietTypeRepository repository;
+public class CaloriesTypeServiceImpl implements CaloriesTypeService {
+    private final CaloriesTypeRepository repository;
 
-    private final DietTypeMapper mapper;
+    private final CaloriesTypeMapper mapper;
 
     @Override
-    public DietTypeDto findById(Long id) {
+    public CaloriesTypeDto findById(Long id) {
         return mapper.toDto(repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Диета с id = %d не найден!".formatted(id))));
     }
 
     @Override
-    public List<DietTypeDto> findAll() {
+    public List<CaloriesTypeDto> findAll() {
         return repository.findAll()
                 .stream().map(mapper::toDto)
                 .collect(Collectors.toList());
@@ -36,12 +36,12 @@ public class DietServiceImpl implements DietService {
 
     @Override
     @Transactional
-    public DietTypeDto create(DietTypeCreateDto dto) {
+    public CaloriesTypeDto create(CaloriesTypeCreateDto dto) {
         return mapper.toDto(repository.save(mapper.toModel(dto)));
     }
 
     @Override
-    public DietTypeDto update(DietTypeUpdateDto dto) {
+    public CaloriesTypeDto update(CaloriesTypeUpdateDto dto) {
         return mapper.toDto(repository.save(mapper.toModel(dto)));
     }
 

@@ -1,6 +1,5 @@
 package ru.otus.hw.services.meal_position;
 
-import ru.otus.hw.dto.meal.MealDto;
 import ru.otus.hw.dto.meal_positions.MealPositionCreateDto;
 import ru.otus.hw.dto.meal_positions.MealPositionDto;
 import ru.otus.hw.dto.meal_positions.MealPositionUpdateDto;
@@ -8,7 +7,7 @@ import ru.otus.hw.dto.meal_positions.MealPositionUpdateDto;
 import java.util.List;
 
 public interface MealPositionService {
-    List<MealPositionDto> findAllByMeal(MealDto mealDto);
+    List<MealPositionDto> findAllByMealId(Long mealId);
 
     List<MealPositionDto> findAll();
 

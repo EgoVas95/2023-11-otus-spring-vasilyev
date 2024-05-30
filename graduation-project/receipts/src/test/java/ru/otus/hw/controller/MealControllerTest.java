@@ -14,13 +14,16 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.configurations.KeycloakLogoutHandler;
 import ru.otus.hw.configurations.SecurityConfig;
-import ru.otus.hw.dto.food.FoodDto;
-import ru.otus.hw.dto.receipt.ReceiptCreateDto;
-import ru.otus.hw.dto.receipt.ReceiptDto;
-import ru.otus.hw.dto.receipt.ReceiptUpdateDto;
+import ru.otus.hw.dto.calories.CaloriesTypeDto;
+import ru.otus.hw.dto.diets.DietTypeDto;
+import ru.otus.hw.dto.meal.MealCreateDto;
+import ru.otus.hw.dto.meal.MealDto;
+import ru.otus.hw.dto.meal.MealUpdateDto;
+import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.services.receipt.ReceiptServiceImpl;
+import ru.otus.hw.services.meal.MealServiceImpl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.LongStream;
 
@@ -34,10 +37,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("Контроллер рецептов")
-@WebMvcTest(ReceiptController.class)
+@DisplayName("Контроллер приёмов пищи")
+@WebMvcTest(MealController.class)
 @Import({SecurityConfig.class, KeycloakLogoutHandler.class})
-class ReceiptControllerTest {
+class MealControllerTest {
 
     private static final long FIRST_ID = 1L;
 
@@ -48,9 +51,24 @@ class ReceiptControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private ReceiptServiceImpl service;
+    private MealServiceImpl service;
 
-    @DisplayName("Получить все рецепты")
+    @DisplayName("Получить всё по параметрам")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
+    @Test
+    void findAllByParams() throws Exception {
+        val expect = getExampleList();
+        given(service.findAllBySeveralParams(any(), any(), any())).willReturn(expect);
+        mvc.perform(get("/api/meals/%d/%d/%d"
+                        .formatted(FIRST_ID, FIRST_ID, FIRST_ID)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expect)));
+    }
+
+    @DisplayName("Получить всё")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -59,12 +77,12 @@ class ReceiptControllerTest {
     void findAll() throws Exception {
         val expect = getExampleList();
         given(service.findAll()).willReturn(expect);
-        mvc.perform(get("/api/receipts"))
+        mvc.perform(get("/api/meals"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
 
-    @DisplayName("Получить рецепта по id")
+    @DisplayName("Получить по id")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -75,12 +93,11 @@ class ReceiptControllerTest {
         given(service.findById(any()))
                 .willReturn(dto);
 
-        mvc.perform(get("/api/receipts/%d".formatted(FIRST_ID)))
+        mvc.perform(get("/api/meals/%d".formatted(FIRST_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
-
-    @DisplayName("Ошибка при получении рецепта по id")
+    @DisplayName("Ошибка при получении по id")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -90,27 +107,11 @@ class ReceiptControllerTest {
         given(service.findById(any()))
                 .willThrow(new EntityNotFoundException());
 
-        mvc.perform(get("/api/receipts/%d".formatted(FIRST_ID)))
+        mvc.perform(get("/api/meals/%d".formatted(FIRST_ID)))
                 .andExpect(status().isNotFound());
     }
 
-    @DisplayName("Получить рецепты по foodId")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_read", "PRODUCT_write"}
-    )
-    @Test
-    void findByFoodId() throws Exception {
-        val expect = getExampleList();
-        given(service.findAllByFoodId(any()))
-                .willReturn(expect);
-
-        mvc.perform(get("/api/receipts/food/%d".formatted(FIRST_ID)))
-                .andExpect(status().isOk())
-                .andExpect(content().json(mapper.writeValueAsString(expect)));
-    }
-
-    @DisplayName("Добавление нового рецепта")
+    @DisplayName("Добавление нового")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -121,46 +122,73 @@ class ReceiptControllerTest {
         given(service.create(any()))
                 .willReturn(dto);
 
-        val createDto = new ReceiptCreateDto(dto.getFoodDto().getId(), dto.getInstruction());
-        mvc.perform(post("/api/receipts")
+        val createDto = new MealCreateDto(dto.getMealtimeTypeDto(),
+                dto.getDietTypeDto(), dto.getCaloriesDto());
+        mvc.perform(post("/api/meals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
-
-    @DisplayName("Ошибка при добавлении нового рецепта с foodId = null")
+    @DisplayName("Ошибка при добавлении нового. mealtimeType = null")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
     )
     @Test
-    void createExceptionWithFoodIdNull() throws Exception {
+    void createWithExceptionMealtimeTypeNull() throws Exception {
         val dto = getDto();
-        val createDto = new ReceiptCreateDto(null, dto.getInstruction());
-        mvc.perform(post("/api/receipts")
+        given(service.create(any()))
+                .willReturn(dto);
+
+        val createDto = new MealCreateDto(null,
+                dto.getDietTypeDto(), dto.getCaloriesDto());
+        mvc.perform(post("/api/meals")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(createDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("errorMsgs"));
+    }
+    @DisplayName("Ошибка при добавлении нового. dietType = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
+    @Test
+    void createWithExceptionDietTypeNull() throws Exception {
+        val dto = getDto();
+        given(service.create(any()))
+                .willReturn(dto);
+
+        val createDto = new MealCreateDto(dto.getMealtimeTypeDto(),
+                null, dto.getCaloriesDto());
+        mvc.perform(post("/api/meals")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(createDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("errorMsgs"));
+    }
+    @DisplayName("Ошибка при добавлении нового. caloriesType = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
+    @Test
+    void createWithExceptionCaloriesTypeNull() throws Exception {
+        val dto = getDto();
+        given(service.create(any()))
+                .willReturn(dto);
+
+        val createDto = new MealCreateDto(dto.getMealtimeTypeDto(),
+                dto.getDietTypeDto(), null);
+        mvc.perform(post("/api/meals")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().exists("errorMsgs"));
     }
 
-    @DisplayName("Ошибка при добавлении нового рецепта с instruction = null")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_read", "PRODUCT_write"}
-    )
-    @Test
-    void createExceptionWithInstructionNull() throws Exception {
-        val dto = getDto();
-        val createDto = new ReceiptCreateDto(dto.getFoodDto().getId(), null);
-        mvc.perform(post("/api/receipts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(header().exists("errorMsgs"));
-    }
-
-    @DisplayName("Изменение рецепта")
+    @DisplayName("Изменение")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -171,16 +199,15 @@ class ReceiptControllerTest {
         given(service.update(any()))
                 .willReturn(dto);
 
-        val updateDto = new ReceiptUpdateDto(dto.getId(),
-                dto.getFoodDto().getId(), dto.getInstruction());
-        mvc.perform(patch("/api/receipts/%d".formatted(dto.getId()))
+        val updateDto = new MealUpdateDto(dto.getId(), dto.getMealtimeTypeDto(),
+                dto.getDietTypeDto(), dto.getCaloriesDto());
+        mvc.perform(patch("/api/meals/%d".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isAccepted())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
     }
-
-    @DisplayName("Ошибка при изменении рецепта с id = null")
+    @DisplayName("Ошибка при изменении с id = null")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
@@ -188,76 +215,100 @@ class ReceiptControllerTest {
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
-        val updateDto = new ReceiptUpdateDto(null,
-                dto.getFoodDto().getId(), dto.getInstruction());
-        mvc.perform(patch("/api/receipts/%d".formatted(dto.getId()))
+        given(service.update(any()))
+                .willReturn(dto);
+
+        val updateDto = new MealUpdateDto(null, dto.getMealtimeTypeDto(),
+                dto.getDietTypeDto(), dto.getCaloriesDto());
+        mvc.perform(patch("/api/meals/%d".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().exists("errorMsgs"));
     }
-
-    @DisplayName("Ошибка при изменении рецепта с foodId = null")
+    @DisplayName("Ошибка при изменении с mealtimeType = null")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
     )
     @Test
-    void updateExceptionWithFoodIdNull() throws Exception {
+    void updateExceptionWithMealTimeTypeNull() throws Exception {
         val dto = getDto();
-        val updateDto = new ReceiptUpdateDto(dto.getId(),
-                null, dto.getInstruction());
-        mvc.perform(patch("/api/receipts/%d".formatted(dto.getId()))
+        given(service.update(any()))
+                .willReturn(dto);
+
+        val updateDto = new MealUpdateDto(dto.getId(), null,
+                dto.getDietTypeDto(), dto.getCaloriesDto());
+        mvc.perform(patch("/api/meals/%d".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().exists("errorMsgs"));
     }
-
-    @DisplayName("Ошибка при изменении рецепта с instruction = null")
+    @DisplayName("Ошибка при изменении с dietType = null")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
     )
     @Test
-    void updateExceptionWithInstructionNull() throws Exception {
+    void updateExceptionWithDietTypeNull() throws Exception {
         val dto = getDto();
-        val updateDto = new ReceiptUpdateDto(dto.getId(),
-                dto.getFoodDto().getId(), null);
-        mvc.perform(patch("/api/receipts/%d".formatted(dto.getId()))
+        given(service.update(any()))
+                .willReturn(dto);
+
+        val updateDto = new MealUpdateDto(dto.getId(), dto.getMealtimeTypeDto(),
+                null, dto.getCaloriesDto());
+        mvc.perform(patch("/api/meals/%d".formatted(dto.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().exists("errorMsgs"));
+    }
+    @DisplayName("Ошибка при изменении с caloriesType = null")
+    @WithMockUser(
+            username = "user",
+            authorities = {"PRODUCT_read", "PRODUCT_write"}
+    )
+    @Test
+    void updateExceptionWithCaloriesTypeNull() throws Exception {
+        val dto = getDto();
+        given(service.update(any()))
+                .willReturn(dto);
+
+        val updateDto = new MealUpdateDto(dto.getId(), dto.getMealtimeTypeDto(),
+                dto.getDietTypeDto(), null);
+        mvc.perform(patch("/api/meals/%d".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().exists("errorMsgs"));
     }
 
-    @DisplayName("Удаление рецепта")
+    @DisplayName("Удаление продукта")
     @WithMockUser(
             username = "user",
             authorities = {"PRODUCT_read", "PRODUCT_write"}
     )
     @Test
-    void deleteEx() throws Exception {
-        mvc.perform(delete("/api/receipts/%d".formatted(getDto().getId())))
+    void deleteOk() throws Exception {
+        mvc.perform(delete("/api/meals/%d".formatted(FIRST_ID)))
                 .andExpect(status().isNoContent());
     }
 
-    private List<ReceiptDto> getExampleList() {
+    private List<MealDto> getExampleList() {
         return LongStream.range(1L, 4L).boxed()
                 .map(this::getDto)
                 .toList();
     }
 
-    private ReceiptDto getDto() {
+    private MealDto getDto() {
         return getDto(FIRST_ID);
     }
 
-    private ReceiptDto getDto(Long id) {
-        return new ReceiptDto(id, getFoodDto(id),
-                "receipt_%d".formatted(id));
-    }
-
-    private FoodDto getFoodDto(Long id) {
-        return new FoodDto(id, "food_%d".formatted(id));
+    private MealDto getDto(Long id) {
+        return new MealDto(id,
+                new MealtimeTypeDto(id, "mealtime_%d".formatted(id)),
+                new DietTypeDto(id, "diet_%d".formatted(id)),
+                new CaloriesTypeDto(id, new BigDecimal(id)));
     }
 }

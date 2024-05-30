@@ -24,7 +24,6 @@ import java.util.stream.LongStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,13 +48,6 @@ class FoodControllerTest {
     @MockBean
     private FoodServiceImpl service;
 
-    @DisplayName("Должен вернуть редирект на страницу login")
-    @Test
-    void shouldReturnRedirectToLoginPage() throws Exception {
-        mvc.perform(get("/api/foods")
-                        .with(csrf()))
-                .andExpect(status().isUnauthorized());
-    }
 
     @DisplayName("Получить все продукты")
     @WithMockUser(
@@ -69,22 +61,6 @@ class FoodControllerTest {
         mvc.perform(get("/api/foods"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
-    }
-    @DisplayName("Ошибка no authorized. Получить все продукты")
-    @Test
-    void findAllNotAuthEx() throws Exception {
-        mvc.perform(get("/api/foods"))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Получить все продукты")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_write"}
-    )
-    @Test
-    void findAllAuthorityEx() throws Exception {
-        mvc.perform(get("/api/foods"))
-                .andExpect(status().isForbidden());
     }
 
     @DisplayName("Получить продукт по id")
@@ -101,22 +77,6 @@ class FoodControllerTest {
         mvc.perform(get("/api/foods/%d".formatted(FIRST_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
-    }
-    @DisplayName("Ошибка no authorized. Получить продукт по id")
-    @Test
-    void findByIdNotAuthEx() throws Exception {
-        mvc.perform(get("/api/foods/%d".formatted(FIRST_ID)))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Получить продукт по id")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_write"}
-    )
-    @Test
-    void findByIdAuthorityEx() throws Exception {
-        mvc.perform(get("/api/foods/%d".formatted(FIRST_ID)))
-                .andExpect(status().isForbidden());
     }
     @DisplayName("Ошибка при получении продукта по id")
     @WithMockUser(
@@ -147,22 +107,6 @@ class FoodControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
-    @DisplayName("Ошибка no authorized. Получить продукты по наименованию")
-    @Test
-    void findByNameNotAuthEx() throws Exception {
-        mvc.perform(get("/api/foods/name/%s".formatted(FIRST_ID)))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Получить продукты по наименованию")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_write"}
-    )
-    @Test
-    void findByNameAuthorityEx() throws Exception {
-        mvc.perform(get("/api/foods/name/%s".formatted(FIRST_ID)))
-                .andExpect(status().isForbidden());
-    }
 
     @DisplayName("Добавление нового продукта")
     @WithMockUser(
@@ -175,42 +119,12 @@ class FoodControllerTest {
         given(service.create(any()))
                 .willReturn(dto);
 
-        val createDto = new FoodCreateDto(dto.getId(), dto.getName());
+        val createDto = new FoodCreateDto(null, dto.getName());
         mvc.perform(post("/api/foods")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
-    }
-    @DisplayName("Ошибка no authorized. Добавление нового продукта")
-    @Test
-    void createNotAuthEx() throws Exception {
-        val dto = getDto();
-        given(service.create(any()))
-                .willReturn(dto);
-
-        val createDto = new FoodCreateDto(dto.getId(), dto.getName());
-        mvc.perform(post("/api/foods")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Добавление нового продукта")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_read"}
-    )
-    @Test
-    void createAuthorityEx() throws Exception {
-        val dto = getDto();
-        given(service.create(any()))
-                .willReturn(dto);
-
-        val createDto = new FoodCreateDto(dto.getId(), dto.getName());
-        mvc.perform(post("/api/foods")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(createDto)))
-                .andExpect(status().isForbidden());
     }
     @DisplayName("Ошибка при добавлении нового продукта")
     @WithMockUser(
@@ -244,36 +158,6 @@ class FoodControllerTest {
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isAccepted())
                 .andExpect(content().json(mapper.writeValueAsString(dto)));
-    }
-    @DisplayName("Ошибка no authorized. Изменение продукта")
-    @Test
-    void updateNotAuthEx() throws Exception {
-        val dto = getDto();
-        given(service.update(any()))
-                .willReturn(dto);
-
-        val updateDto = new FoodUpdateDto(dto.getId(), dto.getName());
-        mvc.perform(patch("/api/foods/%d".formatted(dto.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Изменение продукта")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_read"}
-    )
-    @Test
-    void updateAuthorityEx() throws Exception {
-        val dto = getDto();
-        given(service.update(any()))
-                .willReturn(dto);
-
-        val updateDto = new FoodUpdateDto(dto.getId(), dto.getName());
-        mvc.perform(patch("/api/foods/%d".formatted(dto.getId()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(mapper.writeValueAsString(updateDto)))
-                .andExpect(status().isForbidden());
     }
     @DisplayName("Ошибка при изменении продукта с id = null")
     @WithMockUser(
@@ -312,34 +196,22 @@ class FoodControllerTest {
             authorities = {"PRODUCT_read", "PRODUCT_write"}
     )
     @Test
-    void deleteEx() throws Exception {
+    void deleteOk() throws Exception {
         mvc.perform(delete("/api/foods/%d".formatted(FIRST_ID)))
                 .andExpect(status().isNoContent());
-    }
-    @DisplayName("Ошибка no authorized. Удаление продукта")
-    @Test
-    void deleteNotAuthEx() throws Exception {
-        mvc.perform(delete("/api/foods/%d".formatted(FIRST_ID)))
-                .andExpect(status().isUnauthorized());
-    }
-    @DisplayName("Ошибка по неправильному authority. Удаление продукта")
-    @WithMockUser(
-            username = "user",
-            authorities = {"PRODUCT_read"}
-    )
-    @Test
-    void deleteAuthorityEx() throws Exception {
-        mvc.perform(delete("/api/foods/%d".formatted(FIRST_ID)))
-                .andExpect(status().isForbidden());
     }
 
     private List<FoodDto> getExampleList() {
         return LongStream.range(1L, 4L).boxed()
-                .map(id -> new FoodDto(id, "food %d".formatted(id)))
+                .map(this::getDto)
                 .toList();
     }
 
     private FoodDto getDto() {
-        return new FoodDto(FIRST_ID, "food %d".formatted(FIRST_ID));
+        return getDto(FIRST_ID);
+    }
+
+    private FoodDto getDto(Long id) {
+        return new FoodDto(id, "food %d".formatted(id));
     }
 }

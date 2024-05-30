@@ -1,6 +1,5 @@
 package ru.otus.hw.mappers;
 
-import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.otus.hw.dto.diets.DietTypeCreateDto;
 import ru.otus.hw.dto.diets.DietTypeDto;

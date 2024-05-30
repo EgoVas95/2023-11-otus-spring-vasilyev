@@ -7,10 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import ru.otus.hw.models.CaloriesType;
-import ru.otus.hw.models.DietType;
 import ru.otus.hw.models.Meal;
-import ru.otus.hw.models.MealtimeType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,17 +32,15 @@ class MealRepositoryTest {
     @DisplayName("Поиск приёма пищи по набору параметров")
     void findByCustomParams() {
         val map = getMapDb();
-        map.keySet().forEach(mealtimeType -> {
-            map.get(mealtimeType).keySet().forEach(dietType -> {
-                map.get(mealtimeType).get(dietType).keySet().forEach(caloriesType -> {
-                    val expected = map.get(mealtimeType).get(dietType).get(caloriesType);
-                    assertThat(repository.findAllByMealtimeTypeAndDietTypeAndAndCaloriesType(
-                            mealtimeType, dietType, caloriesType))
-                            .usingRecursiveComparison()
-                            .isEqualTo(expected);
-                });
-            });
-        });
+        map.keySet().forEach(mealtimeType -> map.get(mealtimeType)
+                .keySet().forEach(dietType ->
+                        map.get(mealtimeType).get(dietType).keySet().forEach(caloriesType -> {
+                            val expected = map.get(mealtimeType).get(dietType).get(caloriesType);
+                            assertThat(repository.findAllByMealtimeTypeIdAndDietTypeIdAndCaloriesTypeId(
+                                    mealtimeType, dietType, caloriesType))
+                                    .usingRecursiveComparison()
+                                    .isEqualTo(expected);
+                        })));
     }
 
     @Test
@@ -115,18 +110,18 @@ class MealRepositoryTest {
                 .toList();
     }
 
-    private Map<MealtimeType, Map<DietType, Map<CaloriesType, List<Meal>>>> getMapDb() {
-        Map<MealtimeType, Map<DietType, Map<CaloriesType, List<Meal>>>> map = new HashMap<>();
+    private Map<Long, Map<Long, Map<Long, List<Meal>>>> getMapDb() {
+        Map<Long, Map<Long, Map<Long, List<Meal>>>> map = new HashMap<>();
         getDb().forEach(match -> {
-            val mealtime = match.getMealtimeType();
+            val mealtime = match.getMealtimeType().getId();
             if (!map.containsKey(mealtime)) {
                 map.put(mealtime, new HashMap<>());
             }
-            val diet = match.getDietType();
+            val diet = match.getDietType().getId();
             if (!map.get(mealtime).containsKey(diet)) {
                 map.get(mealtime).put(diet, new HashMap<>());
             }
-            val calories = match.getCaloriesType();
+            val calories = match.getCaloriesType().getId();
             if (!map.get(mealtime).get(diet).containsKey(calories)) {
                 map.get(mealtime).get(diet).put(calories, new ArrayList<>());
             }

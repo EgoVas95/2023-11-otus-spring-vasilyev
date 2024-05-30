@@ -6,7 +6,7 @@ import ru.otus.hw.dto.diets.DietTypeUpdateDto;
 
 import java.util.List;
 
-public interface DietService {
+public interface DietTypeService {
     DietTypeDto findById(Long id);
 
     List<DietTypeDto> findAll();

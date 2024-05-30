@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import ru.otus.hw.models.Meal;
 import ru.otus.hw.models.MealPosition;
 
 import java.math.BigDecimal;
@@ -35,7 +34,7 @@ class MealPositionRepositoryTest {
         val map = getMap();
         map.keySet().forEach(key -> {
            val expected = map.get(key);
-           assertThat(repository.findAllByMeal(key))
+           assertThat(repository.findAllByMealId(key))
                    .usingRecursiveComparison()
                    .isEqualTo(expected);
         });
@@ -108,10 +107,10 @@ class MealPositionRepositoryTest {
                 .toList();
     }
 
-    private Map<Meal, List<MealPosition>> getMap() {
-        Map<Meal, List<MealPosition>> result = new HashMap<>();
+    private Map<Long, List<MealPosition>> getMap() {
+        Map<Long, List<MealPosition>> result = new HashMap<>();
         getDb().forEach(obj -> {
-            val meal = obj.getMeal();
+            val meal = obj.getMeal().getId();
             if(!result.containsKey(meal)) {
                 result.put(meal, new ArrayList<>());
             }

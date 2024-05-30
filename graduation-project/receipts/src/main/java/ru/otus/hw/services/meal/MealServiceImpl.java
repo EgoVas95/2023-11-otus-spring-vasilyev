@@ -3,17 +3,11 @@ package ru.otus.hw.services.meal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.hw.dto.calories.CaloriesTypeDto;
-import ru.otus.hw.dto.diets.DietTypeDto;
 import ru.otus.hw.dto.meal.MealCreateDto;
 import ru.otus.hw.dto.meal.MealDto;
 import ru.otus.hw.dto.meal.MealUpdateDto;
-import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.mappers.CaloriesTypeMapper;
-import ru.otus.hw.mappers.DietTypeMapper;
 import ru.otus.hw.mappers.MealMapper;
-import ru.otus.hw.mappers.MealtimeTypeMapper;
 import ru.otus.hw.repositories.CaloriesTypeRepository;
 import ru.otus.hw.repositories.DietTypeRepository;
 import ru.otus.hw.repositories.MealRepository;
@@ -36,19 +30,12 @@ public class MealServiceImpl implements MealService {
 
     private final MealMapper mapper;
 
-    private final MealtimeTypeMapper mealtimeTypeMapper;
-
-    private final DietTypeMapper dietTypeMapper;
-
-    private final CaloriesTypeMapper caloriesTypeMapper;
-
     @Override
-    public List<MealDto> findAllByMealtimeTypeAndDietTypesContainsAndCaloriesTypesContains(
-            MealtimeTypeDto mealtimeType, DietTypeDto dietType, CaloriesTypeDto caloriesType) {
-        return repository.findAllByMealtimeTypeAndDietTypeAndAndCaloriesType(
-                        mealtimeTypeMapper.toModel(mealtimeType),
-                        dietTypeMapper.toModel(dietType),
-                        caloriesTypeMapper.toModel(caloriesType))
+    public List<MealDto> findAllBySeveralParams(Long mealtimeTypeId,
+                                                Long dietTypeId,
+                                                Long caloriesTypeId) {
+        return repository.findAllByMealtimeTypeIdAndDietTypeIdAndCaloriesTypeId(
+                        mealtimeTypeId, dietTypeId, caloriesTypeId)
                 .stream().map(mapper::toDto)
                 .collect(Collectors.toList());
     }

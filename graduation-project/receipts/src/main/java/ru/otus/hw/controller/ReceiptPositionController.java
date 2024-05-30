@@ -20,34 +20,34 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-public class IngredientController {
+public class ReceiptPositionController {
     private final ReceiptPositionServiceImpl service;
 
     @GetMapping("/api/ingredients")
-    public List<ReceiptPositionDto> getAllIngredients() {
+    public List<ReceiptPositionDto> getAll() {
         return service.findAll();
     }
 
     @GetMapping("/api/ingredients/{ingredient_id}")
-    public ReceiptPositionDto getIngredientById(@PathVariable("ingredient_id") Long id) {
+    public ReceiptPositionDto getById(@PathVariable("ingredient_id") Long id) {
         return service.findById(id);
     }
 
     @GetMapping("/api/receipts/ingredients/{receipt_id}")
-    public List<ReceiptPositionDto> getIngredientByReceiptId(@PathVariable("receipt_id") Long id) {
+    public List<ReceiptPositionDto> getByReceiptId(@PathVariable("receipt_id") Long id) {
         return service.findByReceiptId(id);
     }
 
     @PostMapping("/api/ingredients")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ReceiptPositionDto createIngredient(@Valid @RequestBody ReceiptPositionCreateDto dto) {
+    public ReceiptPositionDto create(@Valid @RequestBody ReceiptPositionCreateDto dto) {
         return service.create(dto);
     }
 
     @PatchMapping("/api/ingredients/{ingredient_id}")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public ReceiptPositionDto updateIngredient(@PathVariable("ingredient_id") Long id,
-                                               @Valid @RequestBody ReceiptPositionUpdateDto dto) {
+    public ReceiptPositionDto update(@PathVariable("ingredient_id") Long id,
+                                     @Valid @RequestBody ReceiptPositionUpdateDto dto) {
         dto.setId(id);
         return service.update(dto);
     }

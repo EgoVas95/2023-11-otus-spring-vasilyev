@@ -6,7 +6,7 @@ import ru.otus.hw.dto.calories.CaloriesTypeUpdateDto;
 
 import java.util.List;
 
-public interface CaloriesService {
+public interface CaloriesTypeService {
     CaloriesTypeDto findById(Long id);
 
     List<CaloriesTypeDto> findAll();

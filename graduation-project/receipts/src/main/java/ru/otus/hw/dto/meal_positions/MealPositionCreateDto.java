@@ -18,6 +18,7 @@ public class MealPositionCreateDto {
     @NotNull(message = "Порция не может быть пустой!")
     private ServingDto serving;
 
-    @Positive(message = "Порция должна быть больше 0!")
+    @NotNull(message = "Количество не может быть пустым!")
+    @Positive(message = "Количество должно быть больше 0!")
     private BigDecimal quantity;
 }
