@@ -26,8 +26,11 @@ services:
       - product-network
 
   keycloak:
-    image: bitnami/keycloak
+    image: quay.io/keycloak/keycloak:24.0.4
     container_name: keycloak
+    command:
+      - start-dev
+      - --import-realm
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
@@ -35,12 +38,12 @@ services:
       DB_USER: productUser
       DB_PASSWORD: prodPwdDb
       KEYCLOAK_HTTP_PORT: 8484
-      KEYCLOAK_ADMIN: user
-      KEYCLOAK_ADMIN_PASSWORD: bitnami
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: root
     ports:
-      - "8484:8484"
+      - "8484:8080"
     volumes:
-      - ./keycloak:/opt/keycloak/data/
+      - ./keycloak/realms:/opt/keycloak/data/import
     restart: always
     depends_on:
       - postgres
@@ -48,6 +51,16 @@ services:
       - "postgres:postgres"
     networks:
       - product-network
+
+  mongo:
+    image: mongo
+    ports:
+      - "2888:27017"
+    container_name: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=productUser
+      - MONGO_INITDB_ROOT_PASSWORD=prodPwdDb
 
   products_app:
     build:
