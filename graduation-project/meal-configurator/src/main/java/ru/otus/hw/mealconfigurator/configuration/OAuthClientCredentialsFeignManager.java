@@ -1,4 +1,4 @@
-package ru.otus.hw.configurations;
+package ru.otus.hw.mealconfigurator.configuration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -22,8 +22,7 @@ public class OAuthClientCredentialsFeignManager {
 
     private final ClientRegistration clientRegistration;
 
-    public OAuthClientCredentialsFeignManager(OAuth2AuthorizedClientManager manager,
-                                              ClientRegistration clientRegistration) {
+    public OAuthClientCredentialsFeignManager(OAuth2AuthorizedClientManager manager, ClientRegistration clientRegistration) {
         this.manager = manager;
         this.clientRegistration = clientRegistration;
         this.principal = createPrincipal();
