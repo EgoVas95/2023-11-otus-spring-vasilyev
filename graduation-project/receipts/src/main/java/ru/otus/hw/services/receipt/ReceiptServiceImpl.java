@@ -20,7 +20,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ReceiptMapper receiptMapper;
 
-
     private final ReceiptsRepository receiptsRepository;
 
     private final FoodRepository foodRepository;

@@ -1,4 +1,4 @@
-package ru.otus.hw.configurations;
+package ru.otus.hw.configurations.feign;
 
 import feign.RequestInterceptor;
 import org.springframework.context.annotation.Bean;
@@ -31,18 +31,20 @@ public class OAuthFeignConfig {
         OAuthClientCredentialsFeignManager clientCredentialsFeignManager =
                 new OAuthClientCredentialsFeignManager(authorizedClientManager(), clientRegistration);
         return requestTemplate -> {
-            requestTemplate.header("Authorization", "Bearer " + clientCredentialsFeignManager.getAccessToken());
+            requestTemplate.header("Authorization",
+                    "Bearer " + clientCredentialsFeignManager.getAccessToken());
         };
     }
 
     @Bean
-    OAuth2AuthorizedClientManager authorizedClientManager() {
-        OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
-                .clientCredentials()
-                .build();
+    public OAuth2AuthorizedClientManager authorizedClientManager() {
+        OAuth2AuthorizedClientProvider authorizedClientProvider
+                = OAuth2AuthorizedClientProviderBuilder.builder()
+                .clientCredentials().build();
 
         AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientManager =
-                new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, oAuth2AuthorizedClientService);
+                new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+                        clientRegistrationRepository, oAuth2AuthorizedClientService);
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
         return authorizedClientManager;
     }

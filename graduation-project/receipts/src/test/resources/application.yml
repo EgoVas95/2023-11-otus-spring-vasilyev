@@ -1,28 +1,32 @@
 server:
-  port: 8080
+  port: 8181
 
 spring:
-  messages:
-    encoding: UTF-8
   application:
     name: receipts
+  messages:
+    encoding: UTF-8
 
   security:
     oauth2:
       client:
-        registration:
-          keycloak:
-            client-id: product_client
-            authorization-grant-type: authorization_code
-            scope:
-              - openid
         provider:
           keycloak:
             issuer-uri: http://localhost:8484/realms/product_realm
+            token-uri: http://localhost:8484/realms/product_realm/protocol/openid-connect/token
             user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: product_client
+            client-secret: YRQGQrD7tJbOOGdkuyu1z4jbnQ1h9V5u
+            authorization-grant-type: authorization_code
+            provider: keycloak
+            scope:
+              - openid
+              - profile
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8484/realms/product_realm
+          jwk-set-uri: https://localhost:8484/realms/product_realm/protocol/openid-connect/certs
 
   datasource:
     url: jdbc:h2:mem:testdb

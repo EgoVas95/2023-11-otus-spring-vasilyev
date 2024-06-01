@@ -2,7 +2,6 @@ package ru.otus.hw.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,23 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.otus.hw.dto.food.FoodCreateDto;
 import ru.otus.hw.dto.food.FoodDto;
 import ru.otus.hw.dto.food.FoodUpdateDto;
-import ru.otus.hw.proxies.PlanControllerProxy;
 import ru.otus.hw.services.food.FoodServiceImpl;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@EnableFeignClients("ru.otus.hw.proxies")
 public class FoodController {
     private final FoodServiceImpl service;
 
-    private final PlanControllerProxy proxy;
-
     @GetMapping("/api/foods")
     public List<FoodDto> findAll() {
-        String response = proxy.plans();
-        System.out.println(response);
         return service.findAll();
     }
 

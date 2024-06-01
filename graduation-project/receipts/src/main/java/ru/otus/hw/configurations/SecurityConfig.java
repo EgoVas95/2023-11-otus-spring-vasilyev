@@ -59,7 +59,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        return http.csrf(AbstractHttpConfigurer::disable)
                 // Разрешаем запросы со всех доменов
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new CorsConfiguration();
@@ -79,8 +79,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(config -> config.jwt(Customizer.withDefaults()))
                 .oauth2Login(Customizer.withDefaults())
                 .logout(logout -> logout.addLogoutHandler(
-                        keycloakLogoutHandler).logoutSuccessUrl("/"));
-        return http.build();
+                        keycloakLogoutHandler).logoutSuccessUrl("/"))
+                .build();
     }
 
     @Bean
