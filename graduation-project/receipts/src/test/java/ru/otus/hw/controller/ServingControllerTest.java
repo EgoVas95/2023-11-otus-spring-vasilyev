@@ -12,8 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.configuration.MongoConfiguration;
 import ru.otus.hw.exceptions.EntityNotFoundException;
-import ru.otus.hw.models.CaloriesType;
-import ru.otus.hw.services.calories.CaloriesTypeServiceImpl;
+import ru.otus.hw.models.Food;
+import ru.otus.hw.models.Serving;
+import ru.otus.hw.services.serving.ServingServiceImpl;
 
 import java.util.List;
 import java.util.stream.LongStream;
@@ -27,11 +28,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("Контроллер калоража")
+@DisplayName("Тестирование контроллера диет")
 @EnableAutoConfiguration(exclude = MongoConfiguration.class)
-@WebMvcTest(CaloriesTypeController.class)
-class CaloriesTypeControllerTest {
-
+@WebMvcTest(ServingController.class)
+class ServingControllerTest {
     private static final String FIRST_ID = "1";
 
     @Autowired
@@ -41,7 +41,7 @@ class CaloriesTypeControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private CaloriesTypeServiceImpl service;
+    private ServingServiceImpl service;
 
     @DisplayName("get all")
     @Test
@@ -49,7 +49,7 @@ class CaloriesTypeControllerTest {
         val exList = getDbEx();
         given(service.findAll()).willReturn(exList);
 
-        mvc.perform(get("/api/calories-types"))
+        mvc.perform(get("/api/servings"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(exList)));
     }
@@ -59,7 +59,7 @@ class CaloriesTypeControllerTest {
     void findById() throws Exception {
         val expect = getExampleObj();
         given(service.findById(any())).willReturn(expect);
-        mvc.perform(get("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(get("/api/servings/%s".formatted(FIRST_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
@@ -69,7 +69,7 @@ class CaloriesTypeControllerTest {
     void findByIdEx() throws Exception {
         given(service.findById(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(get("/api/servings/%s".formatted(FIRST_ID)))
                 .andExpect(status().isNotFound());
     }
 
@@ -83,9 +83,9 @@ class CaloriesTypeControllerTest {
         val obj = getExampleObj();
         obj.setId(null);
 
-        mvc.perform(post("/api/calories-types")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(obj)))
+        mvc.perform(post("/api/servings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(obj)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
@@ -95,9 +95,9 @@ class CaloriesTypeControllerTest {
     void createEx() throws Exception {
         val obj = getExampleObj();
         obj.setId(null);
-        obj.setCalories(null);
+        obj.setName(null);
 
-        mvc.perform(post("/api/calories-types")
+        mvc.perform(post("/api/servings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(obj)))
                 .andExpect(status().isBadRequest());
@@ -110,7 +110,7 @@ class CaloriesTypeControllerTest {
         given(service.update(any()))
                 .willReturn(expect);
 
-        mvc.perform(patch("/api/calories-types/%s".formatted(expect.getId()))
+        mvc.perform(patch("/api/servings/%s".formatted(expect.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(expect)))
                 .andExpect(status().isAccepted())
@@ -121,9 +121,9 @@ class CaloriesTypeControllerTest {
     @Test
     void updateEx() throws Exception {
         val expect = getExampleObj();
-        expect.setCalories(null);
+        expect.setName(null);
 
-        mvc.perform(patch("/api/calories-types/%s".formatted(expect.getId()))
+        mvc.perform(patch("/api/servings/%s".formatted(expect.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(expect)))
                 .andExpect(status().isBadRequest());
@@ -132,21 +132,22 @@ class CaloriesTypeControllerTest {
     @DisplayName("delete")
     @Test
     void deleteObj() throws Exception {
-        mvc.perform(delete("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(delete("/api/servings/%s".formatted(FIRST_ID)))
                 .andExpect(status().isNoContent());
     }
 
-    private List<CaloriesType> getDbEx() {
+    private List<Serving> getDbEx() {
         return LongStream.range(1L, 4L).boxed()
                 .map(this::getExampleObj)
                 .toList();
     }
 
-    private CaloriesType getExampleObj() {
+    private Serving getExampleObj() {
         return getExampleObj(1L);
     }
 
-    private CaloriesType getExampleObj(Long id) {
-        return new CaloriesType(id.toString(), id);
+    private Serving getExampleObj(Long id) {
+        return new Serving(id.toString(), id.toString(),
+                new Food(id.toString(), id.toString()), id);
     }
 }

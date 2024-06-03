@@ -41,15 +41,15 @@ public class ReceiptController {
     }
 
     @PostMapping("/api/receipts")
-    @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Receipt update(@Valid @RequestBody Receipt receipt) {
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public Receipt create(@Valid @RequestBody Receipt receipt) {
         return service.create(receipt);
     }
 
     @PatchMapping("/api/receipts/{receipt_id}")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Receipt update(@PathVariable("receipt_id") String id,
-                             @Valid @RequestBody Receipt receipt) {
+    public Receipt create(@PathVariable("receipt_id") String id,
+                          @Valid @RequestBody Receipt receipt) {
         receipt.setId(id);
         return service.update(receipt);
     }

@@ -1,4 +1,4 @@
-package ru.otus.hw.changelog;
+package ru.otus.hw.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
-public class DatabaseChangelog {
+public class InitializeMongoService {
     private final List<CaloriesType> caloriesTypeList = new ArrayList<>(4);
 
     private final List<DietType> dietTypeList = new ArrayList<>(3);

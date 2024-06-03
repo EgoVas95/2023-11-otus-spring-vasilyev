@@ -1,53 +1,10 @@
-server:
-  port: 8181
-
 spring:
   application:
     name: receipts
   messages:
     encoding: UTF-8
-
-  security:
-    oauth2:
-      client:
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8484/realms/product_realm
-            token-uri: http://localhost:8484/realms/product_realm/protocol/openid-connect/token
-            user-name-attribute: preferred_username
-        registration:
-          keycloak:
-            client-id: product_client
-            client-secret: Eh4iRZiLV11ruxcXJCdLZZ7V9Df3cM0S
-            authorization-grant-type: authorization_code
-            provider: keycloak
-            scope:
-              - openid
-              - profile
-      resourceserver:
-        jwt:
-          jwk-set-uri: https://localhost:8484/realms/product_realm/protocol/openid-connect/certs
-
   data:
     mongodb:
-      port: 0
-      database: test
-
-logging:
-  level:
-    ROOT: ERROR
-
-de:
-  flapdoodle:
-    mongodb:
-      embedded:
-        version: 4.0.2
-
-mongock:
-  runner-type: applicationrunner
-  change-logs-scan-package:
-    - ru.otus.hw.mongock.changelog
-  mongo-db:
-    write-concern:
-      journal: false
-    read-concern: local
+      port: 2888
+      database: receipts
+      host: localhost

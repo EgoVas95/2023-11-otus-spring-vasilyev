@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.otus.hw.changelog.DatabaseChangelog;
+import ru.otus.hw.services.InitializeMongoService;
 import ru.otus.hw.models.CaloriesType;
 import ru.otus.hw.models.DietType;
 import ru.otus.hw.models.meals_configurator.Day;
@@ -22,7 +22,7 @@ import java.util.List;
 public class MealConfiguratorController {
     private final PlanControllerProxy proxy;
 
-    private final DatabaseChangelog changelog;
+    private final InitializeMongoService changelog;
 
     private final DietTypeRepository dietTypeRepository;
 

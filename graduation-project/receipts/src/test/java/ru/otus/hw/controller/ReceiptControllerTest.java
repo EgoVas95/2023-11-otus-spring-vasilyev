@@ -13,8 +13,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.otus.hw.configuration.MongoConfiguration;
 import ru.otus.hw.exceptions.EntityNotFoundException;
 import ru.otus.hw.models.CaloriesType;
-import ru.otus.hw.services.calories.CaloriesTypeServiceImpl;
+import ru.otus.hw.models.DietType;
+import ru.otus.hw.models.Mealtime;
+import ru.otus.hw.models.Receipt;
+import ru.otus.hw.services.receipt.ReceiptServiceImpl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.LongStream;
 
@@ -27,11 +31,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("Контроллер калоража")
+@DisplayName("Тестирование контроллера диет")
 @EnableAutoConfiguration(exclude = MongoConfiguration.class)
-@WebMvcTest(CaloriesTypeController.class)
-class CaloriesTypeControllerTest {
-
+@WebMvcTest(ReceiptController.class)
+class ReceiptControllerTest {
     private static final String FIRST_ID = "1";
 
     @Autowired
@@ -41,7 +44,7 @@ class CaloriesTypeControllerTest {
     private ObjectMapper mapper;
 
     @MockBean
-    private CaloriesTypeServiceImpl service;
+    private ReceiptServiceImpl service;
 
     @DisplayName("get all")
     @Test
@@ -49,7 +52,20 @@ class CaloriesTypeControllerTest {
         val exList = getDbEx();
         given(service.findAll()).willReturn(exList);
 
-        mvc.perform(get("/api/calories-types"))
+        mvc.perform(get("/api/receipts"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(exList)));
+    }
+
+    @DisplayName("find by params")
+    @Test
+    void findByParams() throws Exception {
+        val exList = getDbEx();
+        given(service.findAllByMealtimeIdAndDietTypeIdAndAndCaloriesTypeId(
+                any(), any(), any())).willReturn(exList);
+
+        mvc.perform(get("/api/receipts/food/%s/%s/%s"
+                        .formatted(FIRST_ID, FIRST_ID, FIRST_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(exList)));
     }
@@ -59,7 +75,7 @@ class CaloriesTypeControllerTest {
     void findById() throws Exception {
         val expect = getExampleObj();
         given(service.findById(any())).willReturn(expect);
-        mvc.perform(get("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(get("/api/receipts/%s".formatted(FIRST_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
@@ -69,7 +85,7 @@ class CaloriesTypeControllerTest {
     void findByIdEx() throws Exception {
         given(service.findById(any())).willThrow(EntityNotFoundException.class);
 
-        mvc.perform(get("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(get("/api/receipts/%s".formatted(FIRST_ID)))
                 .andExpect(status().isNotFound());
     }
 
@@ -83,9 +99,9 @@ class CaloriesTypeControllerTest {
         val obj = getExampleObj();
         obj.setId(null);
 
-        mvc.perform(post("/api/calories-types")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(obj)))
+        mvc.perform(post("/api/receipts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(obj)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(mapper.writeValueAsString(expect)));
     }
@@ -95,9 +111,9 @@ class CaloriesTypeControllerTest {
     void createEx() throws Exception {
         val obj = getExampleObj();
         obj.setId(null);
-        obj.setCalories(null);
+        obj.setName(null);
 
-        mvc.perform(post("/api/calories-types")
+        mvc.perform(post("/api/receipts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(obj)))
                 .andExpect(status().isBadRequest());
@@ -110,7 +126,7 @@ class CaloriesTypeControllerTest {
         given(service.update(any()))
                 .willReturn(expect);
 
-        mvc.perform(patch("/api/calories-types/%s".formatted(expect.getId()))
+        mvc.perform(patch("/api/receipts/%s".formatted(expect.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(expect)))
                 .andExpect(status().isAccepted())
@@ -121,9 +137,9 @@ class CaloriesTypeControllerTest {
     @Test
     void updateEx() throws Exception {
         val expect = getExampleObj();
-        expect.setCalories(null);
+        expect.setName(null);
 
-        mvc.perform(patch("/api/calories-types/%s".formatted(expect.getId()))
+        mvc.perform(patch("/api/receipts/%s".formatted(expect.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(expect)))
                 .andExpect(status().isBadRequest());
@@ -132,21 +148,25 @@ class CaloriesTypeControllerTest {
     @DisplayName("delete")
     @Test
     void deleteObj() throws Exception {
-        mvc.perform(delete("/api/calories-types/%s".formatted(FIRST_ID)))
+        mvc.perform(delete("/api/receipts/%s".formatted(FIRST_ID)))
                 .andExpect(status().isNoContent());
     }
 
-    private List<CaloriesType> getDbEx() {
+    private List<Receipt> getDbEx() {
         return LongStream.range(1L, 4L).boxed()
                 .map(this::getExampleObj)
                 .toList();
     }
 
-    private CaloriesType getExampleObj() {
+    private Receipt getExampleObj() {
         return getExampleObj(1L);
     }
 
-    private CaloriesType getExampleObj(Long id) {
-        return new CaloriesType(id.toString(), id);
+    private Receipt getExampleObj(Long id) {
+        return new Receipt(id.toString(), id.toString(),
+                new CaloriesType(id.toString(), id),
+                new DietType(id.toString(), id.toString()),
+                new Mealtime(id.toString(), id.toString()),
+                Collections.emptyList());
     }
 }
