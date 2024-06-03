@@ -1,19 +1,17 @@
 package ru.otus.hw.services.calories;
 
-import ru.otus.hw.dto.calories.CaloriesTypeCreateDto;
-import ru.otus.hw.dto.calories.CaloriesTypeDto;
-import ru.otus.hw.dto.calories.CaloriesTypeUpdateDto;
+import ru.otus.hw.models.CaloriesType;
 
 import java.util.List;
 
 public interface CaloriesTypeService {
-    CaloriesTypeDto findById(Long id);
+    CaloriesType findById(String id);
 
-    List<CaloriesTypeDto> findAll();
+    List<CaloriesType> findAll();
 
-    CaloriesTypeDto create(CaloriesTypeCreateDto dto);
+    CaloriesType create(CaloriesType caloriesType);
 
-    CaloriesTypeDto update(CaloriesTypeUpdateDto dto);
+    CaloriesType update(CaloriesType caloriesType);
 
-    void delete(Long id);
+    void delete(String id);
 }

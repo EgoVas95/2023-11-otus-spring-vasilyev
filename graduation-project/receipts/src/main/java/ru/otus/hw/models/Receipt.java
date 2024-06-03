@@ -1,37 +1,38 @@
 package ru.otus.hw.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.Table;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "receipts")
-@NamedEntityGraph(name = "receipts-graph",
-        attributeNodes = {@NamedAttributeNode("food")})
+@Document(collection = "receipts")
 public class Receipt {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinColumn(name = "food_id")
-    private Food food;
+    @NotBlank(message = "Укажите название блюда!")
+    private String name;
 
-    private String instruction;
+    @Valid
+    private CaloriesType caloriesType;
+
+    @Valid
+    private DietType dietType;
+
+    @Valid
+    private Mealtime mealtime;
+
+    @Valid
+    private List<ReceiptPosition> receiptPositionsList;
 }

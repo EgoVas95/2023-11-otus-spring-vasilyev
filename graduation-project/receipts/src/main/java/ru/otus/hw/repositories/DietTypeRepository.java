@@ -1,7 +1,10 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.otus.hw.models.DietType;
 
-public interface DietTypeRepository extends JpaRepository<DietType, Long> {
+import java.util.List;
+
+public interface DietTypeRepository extends MongoRepository<DietType, String> {
+    List<DietType> findAll();
 }

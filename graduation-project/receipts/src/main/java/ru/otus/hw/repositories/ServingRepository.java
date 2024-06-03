@@ -1,35 +1,10 @@
 package ru.otus.hw.repositories;
 
-import jakarta.annotation.Nonnull;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.otus.hw.models.Serving;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
-public interface ServingRepository extends JpaRepository<Serving, Long> {
-
-    @Nonnull
-    @EntityGraph("servings-graph")
-    @Override
+public interface ServingRepository extends MongoRepository<Serving, String> {
     List<Serving> findAll();
-
-    @Nonnull
-    @EntityGraph("servings-graph")
-    @Override
-    Optional<Serving> findById(@Nonnull Long id);
-
-    @Nonnull
-    @EntityGraph("servings-graph")
-    List<Serving>findAllByName(@Nonnull String name);
-
-    @Nonnull
-    @EntityGraph("servings-graph")
-    List<Serving> findAllByFoodId(@Nonnull Long id);
-
-    @Nonnull
-    @EntityGraph("servings-graph")
-    List<Serving> findAllByCaloriesIsLessThanEqual(@Nonnull BigDecimal calories);
 }

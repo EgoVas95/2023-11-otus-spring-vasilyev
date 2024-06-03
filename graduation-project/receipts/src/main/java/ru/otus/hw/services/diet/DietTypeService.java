@@ -1,19 +1,18 @@
 package ru.otus.hw.services.diet;
 
-import ru.otus.hw.dto.diets.DietTypeCreateDto;
-import ru.otus.hw.dto.diets.DietTypeDto;
-import ru.otus.hw.dto.diets.DietTypeUpdateDto;
+
+import ru.otus.hw.models.DietType;
 
 import java.util.List;
 
 public interface DietTypeService {
-    DietTypeDto findById(Long id);
+    DietType findById(String id);
 
-    List<DietTypeDto> findAll();
+    List<DietType> findAll();
 
-    DietTypeDto create(DietTypeCreateDto dto);
+    DietType create(DietType dietType);
 
-    DietTypeDto update(DietTypeUpdateDto dto);
+    DietType update(DietType dietType);
 
-    void delete(Long id);
+    void delete(String id);
 }

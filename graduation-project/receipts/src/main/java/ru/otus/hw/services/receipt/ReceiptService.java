@@ -1,22 +1,20 @@
 package ru.otus.hw.services.receipt;
 
-import ru.otus.hw.dto.receipt.ReceiptCreateDto;
-import ru.otus.hw.dto.receipt.ReceiptDto;
-import ru.otus.hw.dto.receipt.ReceiptUpdateDto;
-
+import ru.otus.hw.models.Receipt;
 import java.util.List;
 
 public interface ReceiptService {
+    Receipt findById(String id);
 
-    ReceiptDto findById(Long id);
+    List<Receipt> findAll();
 
-    List<ReceiptDto> findAll();
+    List<Receipt> findAllByMealtimeIdAndDietTypeIdAndAndCaloriesTypeId(String mealTimeId,
+                                                                       String dietTypeId,
+                                                                       String caloriesTypeId);
 
-    List<ReceiptDto> findAllByFoodId(Long id);
+    Receipt create(Receipt receipt);
 
-    ReceiptDto create(ReceiptCreateDto dto);
+    Receipt update(Receipt receipt);
 
-    ReceiptDto update(ReceiptUpdateDto dto);
-
-    void delete(Long id);
+    void delete(String id);
 }

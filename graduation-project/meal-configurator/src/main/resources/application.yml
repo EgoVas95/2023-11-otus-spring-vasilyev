@@ -1,40 +1,22 @@
 server:
   port: 8282
 
-mongock:
-  runner-type: initializingbean
-  change-logs-scan-package:
-    - ru.otus.hw.mealconfigurator.changelog
-  mongo-db:
-    write-concern:
-      journal: false
-    read-concern: local
-
 spring:
   application:
     name: meal-configurator
   messages:
     encoding: UTF-8
-
   data:
     mongodb:
       port: 2888
-      database: meals
+      database: day-meals
       host: localhost
 
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: product_client
-            client-secret: YRQGQrD7tJbOOGdkuyu1z4jbnQ1h9V5u
-            authorization-grant-type: client_credentials
-            provider: keycloak
-        provider:
-          keycloak:
-            token-uri: http://localhost:8484/realms/product_realm/protocol/openid-connect/token
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:9888/eureka/
+
+logging:
+  level:
+    ROOT: ERROR

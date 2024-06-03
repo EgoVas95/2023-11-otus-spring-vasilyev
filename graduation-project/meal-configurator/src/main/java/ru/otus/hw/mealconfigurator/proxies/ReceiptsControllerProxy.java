@@ -3,34 +3,27 @@ package ru.otus.hw.mealconfigurator.proxies;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.otus.hw.mealconfigurator.configuration.OAuthFeignConfig;
-import ru.otus.hw.mealconfigurator.dto.proxy_dto.FoodDto;
-import ru.otus.hw.mealconfigurator.dto.proxy_dto.MealDto;
-import ru.otus.hw.mealconfigurator.dto.proxy_dto.MealPositionDto;
-import ru.otus.hw.mealconfigurator.dto.proxy_dto.MealtimeTypeDto;
-import ru.otus.hw.mealconfigurator.dto.proxy_dto.ServingDto;
+import ru.otus.hw.mealconfigurator.model.receipt_models.CaloriesType;
+import ru.otus.hw.mealconfigurator.model.receipt_models.DietType;
+import ru.otus.hw.mealconfigurator.model.receipt_models.Mealtime;
+import ru.otus.hw.mealconfigurator.model.receipt_models.Receipt;
 
 import java.util.List;
 
-@FeignClient(name = "receipts",
-    configuration = OAuthFeignConfig.class)
+@FeignClient(name = "receipts")
 public interface ReceiptsControllerProxy {
 
+    @GetMapping("/api/calories-types")
+    List<CaloriesType> getCaloriesTypes();
+
+    @GetMapping("/api/diet-types")
+    List<DietType> getDietTypes();
+
     @GetMapping("/api/mealtimes")
-    List<MealtimeTypeDto> getMealTimeTypes();
+    List<Mealtime> getMealtimes();
 
-    @GetMapping("/api/meals/{mealtime_id}/{diet_id}/{calories_id}")
-    List<MealDto> getMeals(
-            @PathVariable(name = "mealtime_id") Long mealtimeId,
-            @PathVariable(name = "diet_id") Long dietId,
-            @PathVariable(name = "calories_id") Long caloriesId);
-
-    @GetMapping("/api/meal-positions/meal/{meal_id}")
-    List<MealPositionDto> getMealPositionsById(@PathVariable("meal_id") Long mealId);
-
-    @GetMapping("/api/servings/{serving_id}")
-    ServingDto getServingsById(@PathVariable("serving_id") Long id);
-
-    @GetMapping("/api/foods/{food_id}")
-    FoodDto getFoodById(@PathVariable("food_id") Long id);
+    @GetMapping("/api/receipts/food/{mealtime_id}/{diet_type_id}/{calories_type_id}")
+    List<Receipt> getReceiptForMeal(@PathVariable("mealtime_id") String mealtimeId,
+                                    @PathVariable("diet_type_id") String dietTypeId,
+                                    @PathVariable("calories_type_id") String caloriesTypeId);
 }

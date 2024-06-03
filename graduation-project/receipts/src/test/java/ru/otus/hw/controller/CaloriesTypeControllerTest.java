@@ -7,19 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.otus.hw.configurations.KeycloakLogoutHandler;
-import ru.otus.hw.configurations.SecurityConfig;
-import ru.otus.hw.dto.calories.CaloriesTypeCreateDto;
-import ru.otus.hw.dto.calories.CaloriesTypeDto;
-import ru.otus.hw.dto.calories.CaloriesTypeUpdateDto;
 import ru.otus.hw.exceptions.EntityNotFoundException;
+import ru.otus.hw.models.CaloriesType;
 import ru.otus.hw.services.calories.CaloriesTypeServiceImpl;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.LongStream;
 
@@ -35,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DisplayName("Контроллер типов калоража")
 @WebMvcTest(CaloriesTypeController.class)
-@Import({SecurityConfig.class, KeycloakLogoutHandler.class})
 class CaloriesTypeControllerTest {
 
     private static final long FIRST_ID = 1L;
@@ -104,7 +97,7 @@ class CaloriesTypeControllerTest {
         given(service.create(any()))
                 .willReturn(dto);
 
-        val createDto = new CaloriesTypeCreateDto(null, dto.getCalories());
+        val createDto = new CaloriesType(null, dto.getCalories());
         mvc.perform(post("/api/calories-types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
@@ -118,7 +111,7 @@ class CaloriesTypeControllerTest {
     )
     @Test
     void createWithException() throws Exception {
-        val createDto = new CaloriesTypeCreateDto(null, null);
+        val createDto = new CaloriesType(null, null);
         mvc.perform(post("/api/calories-types")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(createDto)))
@@ -137,7 +130,7 @@ class CaloriesTypeControllerTest {
         given(service.update(any()))
                 .willReturn(dto);
 
-        val updateDto = new CaloriesTypeUpdateDto(dto.getId(), new BigDecimal(101));
+        val updateDto = new CaloriesType(dto.getId(), 101L);
         mvc.perform(patch("/api/calories-types/%d".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
@@ -152,8 +145,8 @@ class CaloriesTypeControllerTest {
     @Test
     void updateExceptionWithIdNull() throws Exception {
         val dto = getDto();
-        val updateDto = new CaloriesTypeUpdateDto(null, dto.getCalories());
-        mvc.perform(patch("/api/calories-types/%d".formatted(dto.getId()))
+        val updateDto = new CaloriesType(null, dto.getCalories());
+        mvc.perform(patch("/api/calories-types/%s".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
@@ -167,8 +160,8 @@ class CaloriesTypeControllerTest {
     @Test
     void updateExceptionWithNameNull() throws Exception {
         val dto = getDto();
-        val updateDto = new CaloriesTypeUpdateDto(dto.getId(), null);
-        mvc.perform(patch("/api/calories-types/%d".formatted(dto.getId()))
+        val updateDto = new CaloriesType(dto.getId(), null);
+        mvc.perform(patch("/api/calories-types/%s".formatted(dto.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(updateDto)))
                 .andExpect(status().isBadRequest())
@@ -186,17 +179,17 @@ class CaloriesTypeControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    private List<CaloriesTypeDto> getExampleList() {
+    private List<CaloriesType> getExampleList() {
         return LongStream.range(1L, 4L).boxed()
                 .map(this::getDto)
                 .toList();
     }
 
-    private CaloriesTypeDto getDto() {
+    private CaloriesType getDto() {
         return getDto(FIRST_ID);
     }
 
-    private CaloriesTypeDto getDto(Long id) {
-        return new CaloriesTypeDto(id, new BigDecimal(id));
+    private CaloriesType getDto(Long id) {
+        return new CaloriesType(id.toString(), 1L);
     }
 }

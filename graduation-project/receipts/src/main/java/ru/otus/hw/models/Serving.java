@@ -1,47 +1,32 @@
 package ru.otus.hw.models;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedAttributeNode;
-import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.Table;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "servings")
-@NamedEntityGraph(name = "servings-graph",
-        attributeNodes = {@NamedAttributeNode("food")})
+@Document(collection = "servings")
 public class Serving {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
+    @NotBlank(message = "Наименование порции не может быть пустым!")
     private String name;
 
-    @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    @JoinColumn(name = "food_id")
+    @Valid
     private Food food;
 
-    private BigDecimal calories;
-
-    private BigDecimal proteins;
-
-    private BigDecimal fats;
-
-    private BigDecimal carbohydrates;
+    @NotNull(message = "Количество белка не должно быть пустым!")
+    @PositiveOrZero(message = "Количество килокалорий не должно быть меньше 0!")
+    private Long calories;
 }

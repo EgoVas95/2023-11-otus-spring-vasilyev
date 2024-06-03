@@ -1,7 +1,10 @@
 package ru.otus.hw.repositories;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.otus.hw.models.CaloriesType;
 
-public interface CaloriesTypeRepository extends JpaRepository<CaloriesType, Long> {
+import java.util.List;
+
+public interface CaloriesTypeRepository extends MongoRepository<CaloriesType, String> {
+    List<CaloriesType> findAll();
 }

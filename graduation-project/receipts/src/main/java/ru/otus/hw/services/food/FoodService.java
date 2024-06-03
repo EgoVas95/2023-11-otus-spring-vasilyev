@@ -1,21 +1,17 @@
 package ru.otus.hw.services.food;
 
-import ru.otus.hw.dto.food.FoodCreateDto;
-import ru.otus.hw.dto.food.FoodDto;
-import ru.otus.hw.dto.food.FoodUpdateDto;
+import ru.otus.hw.models.Food;
 
 import java.util.List;
 
 public interface FoodService {
-    List<FoodDto> findByName(String name);
+    Food findById(String id);
 
-    FoodDto findById(Long id);
+    List<Food> findAll();
 
-    List<FoodDto> findAll();
+    Food create(Food food);
 
-    FoodDto create(FoodCreateDto dto);
+    Food update(Food food);
 
-    FoodDto update(FoodUpdateDto dto);
-
-    void delete(Long id);
+    void delete(String id);
 }

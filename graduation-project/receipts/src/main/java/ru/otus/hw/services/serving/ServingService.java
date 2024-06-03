@@ -1,26 +1,17 @@
 package ru.otus.hw.services.serving;
 
-import ru.otus.hw.dto.serving.ServingCreateDto;
-import ru.otus.hw.dto.serving.ServingDto;
-import ru.otus.hw.dto.serving.ServingUpdateDto;
+import ru.otus.hw.models.Serving;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface ServingService {
-    List<ServingDto> findAll();
+    Serving findById(String id);
 
-    ServingDto findById(Long id);
+    List<Serving> findAll();
 
-    List<ServingDto> findByFoodId(Long id);
+    Serving create(Serving serving);
 
-    List<ServingDto> findByName(String name);
+    Serving update(Serving serving);
 
-    List<ServingDto> findByCaloriesLessOrEqThan(BigDecimal calories);
-
-    ServingDto create(ServingCreateDto createDto);
-
-    ServingDto update(ServingUpdateDto updateDto);
-
-    void delete(Long id);
+    void delete(String id);
 }

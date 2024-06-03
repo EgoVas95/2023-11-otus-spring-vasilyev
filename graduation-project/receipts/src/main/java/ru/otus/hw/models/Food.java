@@ -1,25 +1,26 @@
 package ru.otus.hw.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "foods")
+@Document(collection = "foods")
 public class Food {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
+    @NotBlank(message = "Название продукта не может быть пустым!")
+    @Size(min = 1, max = 255, message = "Длина названия продукта " +
+            "должна быть в пределах от 1 до 255 символов!")
     private String name;
 }

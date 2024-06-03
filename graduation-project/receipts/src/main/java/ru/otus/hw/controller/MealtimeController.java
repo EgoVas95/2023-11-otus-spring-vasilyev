@@ -11,50 +11,43 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import ru.otus.hw.dto.mealtime.MealtimeTypeCreateDto;
-import ru.otus.hw.dto.mealtime.MealtimeTypeDto;
-import ru.otus.hw.dto.mealtime.MealtimeTypeUpdateDto;
-import ru.otus.hw.services.mealtime.MealtimeTypeServiceImpl;
+import ru.otus.hw.models.Mealtime;
+import ru.otus.hw.services.mealtime.MealtimeServiceImpl;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 public class MealtimeController {
-    private final MealtimeTypeServiceImpl service;
+    private final MealtimeServiceImpl service;
 
     @GetMapping("/api/mealtimes")
-    public List<MealtimeTypeDto> findAll() {
+    public List<Mealtime> findAll() {
         return service.findAll();
     }
 
     @GetMapping("/api/mealtimes/{mealtime_id}")
-    public MealtimeTypeDto findById(@PathVariable("mealtime_id") Long id) {
+    public Mealtime findById(@PathVariable("mealtime_id") String id) {
         return service.findById(id);
-    }
-
-    @GetMapping("/api/mealtimes/name/{mealtime_name}")
-    public MealtimeTypeDto findByName(@PathVariable("mealtime_name") String name) {
-        return service.findByName(name);
     }
 
     @PostMapping("/api/mealtimes")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public MealtimeTypeDto create(@Valid @RequestBody MealtimeTypeCreateDto dto) {
-        return service.create(dto);
+    public Mealtime create(@Valid @RequestBody Mealtime mealtime) {
+        return service.create(mealtime);
     }
 
     @PatchMapping("/api/mealtimes/{mealtimes_id}")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public MealtimeTypeDto update(@PathVariable("mealtimes_id") Long id,
-            @Valid @RequestBody MealtimeTypeUpdateDto dto) {
-        dto.setId(id);
-        return service.update(dto);
+    public Mealtime update(@PathVariable("mealtimes_id") String id,
+            @Valid @RequestBody Mealtime mealtime) {
+        mealtime.setId(id);
+        return service.update(mealtime);
     }
 
     @DeleteMapping("/api/mealtimes/{mealtimes_id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable("mealtimes_id") Long id) {
+    public void delete(@PathVariable("mealtimes_id") String id) {
         service.delete(id);
     }
 }

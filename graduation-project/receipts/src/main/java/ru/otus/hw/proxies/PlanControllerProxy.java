@@ -3,17 +3,22 @@ package ru.otus.hw.proxies;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import ru.otus.hw.configurations.feign.OAuthFeignConfig;
+import ru.otus.hw.models.meals_configurator.Day;
+import ru.otus.hw.models.meals_configurator.PricePosition;
 
-@FeignClient(name = "meal-configurator",
-    configuration = OAuthFeignConfig.class)
+import java.util.List;
+
+@FeignClient(name = "meal-configurator")
 public interface PlanControllerProxy {
 
-    @GetMapping("api/meal-list/{diet_type_id}/{calories_type_id}/{day_count}")
-    String mealList(@PathVariable("diet_type_id") Long dietTypeId,
-                    @PathVariable("calories_type_id") Long caloriesTypeId,
-                    @PathVariable("day_count") int dayCount);
+    @GetMapping("/api/meal-list/{diet_type_id}/{calories_type_id}/{day_count}")
+    List<Day> mealList(@PathVariable("diet_type_id") String dietTypeId,
+                       @PathVariable("calories_type_id") String caloriesTypeId,
+                       @PathVariable("day_count") int dayCount);
 
-    @GetMapping("api/price-list")
-    String priceList();
+    @GetMapping("/api/buy-list")
+    List<PricePosition> getBuyMap();
+
+    @GetMapping("/api/buy-list/{date}")
+    List<PricePosition> getBuyMap(@PathVariable("date") String dateStr);
 }

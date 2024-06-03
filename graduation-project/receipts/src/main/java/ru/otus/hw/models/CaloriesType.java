@@ -1,27 +1,24 @@
 package ru.otus.hw.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.math.BigDecimal;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "calories")
+@Document(collection = "calories-type")
 public class CaloriesType {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    private BigDecimal calories;
+    @NotNull(message = "Количество ккал не может быть пустым!")
+    @PositiveOrZero(message = "Количество ккал не может быть отрицательным!")
+    private Long calories;
 }
