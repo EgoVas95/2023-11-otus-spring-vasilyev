@@ -1,6 +1,5 @@
 package ru.otus.hw.mealsbot.bot;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -26,7 +25,7 @@ public class MealsBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public void onUpdateReceived(@NotNull Update update) {
+    public void onUpdateReceived(Update update) {
         long chatId = 0;
         String receivedMessage = null;
 
