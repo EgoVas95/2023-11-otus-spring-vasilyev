@@ -5,9 +5,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import ru.otus.hw.services.InitializeMongoService;
-import ru.otus.hw.models.CaloriesType;
-import ru.otus.hw.models.DietType;
 import ru.otus.hw.models.meals_configurator.Day;
 import ru.otus.hw.models.meals_configurator.PricePosition;
 import ru.otus.hw.proxies.PlanControllerProxy;
@@ -22,34 +19,9 @@ import java.util.List;
 public class MealConfiguratorController {
     private final PlanControllerProxy proxy;
 
-    private final InitializeMongoService changelog;
-
     private final DietTypeRepository dietTypeRepository;
 
     private final CaloriesTypeRepository caloriesTypeRepository;
-
-    @GetMapping("/initialize")
-    public void initialize() {
-        changelog.init();
-    }
-
-    @GetMapping("/api/test/meals/{day_count}")
-    public List<Day> mealsTest(@PathVariable("day_count") int dayCount) {
-        DietType dietType = dietTypeRepository.findAll().get(0);
-        CaloriesType caloriesType = caloriesTypeRepository.findAll().get(0);
-
-        return proxy.mealList(dietType.getId(), caloriesType.getId(), dayCount);
-    }
-
-    @GetMapping("/api/test/buy")
-    public List<PricePosition> allBuy() {
-        return proxy.getBuyMap();
-    }
-
-    @GetMapping("/api/test/buy/{date}")
-    public List<PricePosition> dayBuy(@PathVariable("date") String dateStr) {
-        return proxy.getBuyMap(dateStr);
-    }
 
     @GetMapping("/api/meal-configurator/{diet_type_id}/{calories_type_id}/{day_count}")
     public List<Day> getMealsForDays(@PathVariable("diet_type_id") String dietTypeId,

@@ -13,8 +13,16 @@ public class DayConverter {
     private final ReceiptConverter converter;
 
     public String convertList(List<Day> dayList) {
+        if (dayList == null || dayList.isEmpty()) {
+            return "План ещё не сформирован";
+        }
+
         StringBuilder sb = new StringBuilder();
         for (var day : dayList) {
+            if (day == null) {
+                continue;
+            }
+
             sb.append("\n").append(convertDay(day))
                     .append("\n");
         }

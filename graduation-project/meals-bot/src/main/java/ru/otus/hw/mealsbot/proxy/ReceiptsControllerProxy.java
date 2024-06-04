@@ -11,7 +11,7 @@ import ru.otus.hw.mealsbot.models.Receipt;
 import java.util.List;
 
 @FeignClient(name = "receipts", contextId = "bot-receipts",
-    url = "http://localhost:8181")
+    url = "${meals-proxy.receipts}")
 public interface ReceiptsControllerProxy {
 
     @GetMapping("/api/calories-types")

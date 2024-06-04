@@ -28,37 +28,37 @@ public class MessageHandling {
 
     private final PricePositionConverter priceConverter;
 
-    public SendMessage handleCommand(CommandsEnum command, long chatId, String receivedMessage) {
+    public SendMessage handleCommand(String username, CommandsEnum command, long chatId, String receivedMessage) {
         if (receivedMessage == null || receivedMessage.isEmpty()) {
             return null;
         }
 
         return switch (command) {
             case START, RESET -> startBot(chatId);
-            case GENERATE_MEALS -> generateProcess(chatId, "");
-            case SHOW_MEALS -> showMeals(chatId);
-            case SHOW_BUY -> showBuys(chatId);
+            case GENERATE_MEALS -> generateProcess(username, chatId, "");
+            case SHOW_MEALS -> showMeals(username, chatId);
+            case SHOW_BUY -> showBuys(username, chatId);
             default -> null;
         };
     }
 
-    private SendMessage showBuys(long chatId) {
+    private SendMessage showBuys(String username, long chatId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setReplyMarkup(Buttons.startBtns());
-        message.setText(priceConverter.toString(planControllerProxy.getBuyMap()));
+        message.setText(priceConverter.toString(planControllerProxy.geBuyMap(username)));
         return message;
     }
 
-    private SendMessage showMeals(long chatId) {
+    private SendMessage showMeals(String username, long chatId) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setReplyMarkup(Buttons.startBtns());
-        message.setText(dayConverter.convertList(planControllerProxy.getMealsForUser()));
+        message.setText(dayConverter.convertList(planControllerProxy.getMealsForUser(username)));
         return message;
     }
 
-    public SendMessage generateProcess(long chatId, String msg) {
+    public SendMessage generateProcess(String username, long chatId, String msg) {
         String[] vals = msg.split(Buttons.DELIMITIER);
 
         String dietId = vals.length > 1 ? vals[1] : "";
@@ -72,10 +72,10 @@ public class MessageHandling {
             }
         }
 
-        return getGenerateMsg(chatId, dietId, calories, dayCount);
+        return getGenerateMsg(username, chatId, dietId, calories, dayCount);
     }
 
-    private SendMessage getGenerateMsg(long chatId, String dietId, String calories, int dayCount) {
+    private SendMessage getGenerateMsg(String username, long chatId, String dietId, String calories, int dayCount) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
 
@@ -91,19 +91,20 @@ public class MessageHandling {
             message.setText("Выберите количество дней");
             message.setReplyMarkup(Buttons.mealsButtons(dietId, calories));
         } else {
-            message = generateMeals(dietId, calories, chatId, dayCount);
+            message = generateMeals(username, dietId, calories, chatId, dayCount);
         }
         return message;
     }
 
-    private SendMessage generateMeals(String dietId, String caloriesId, long chatId, int dayCount) {
+    private SendMessage generateMeals(String username, String dietId,
+                                      String caloriesId, long chatId, int dayCount) {
         if (dayCount <= 0) {
             Calendar cal = Calendar.getInstance();
             dayCount = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
         }
 
         String msg = dayConverter.convertList(planControllerProxy
-                .mealList(dietId, caloriesId, dayCount));
+                .mealList(username, dietId, caloriesId, dayCount));
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);

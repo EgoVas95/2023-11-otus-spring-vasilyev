@@ -19,15 +19,13 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class DayGeneratorImpl implements DayGenerator {
 
-    private final UserServiceImpl userService;
-
     private final ReceiptsControllerProxy proxy;
 
     private final DayServiceImpl dayService;
 
     @Override
-    public List<Day> generate(String dietTypeId, String caloriesTypeId, int dayCount) {
-        dayService.deleteAllByUserId(userService.getCurrentUserId());
+    public List<Day> generate(String username, String dietTypeId, String caloriesTypeId, int dayCount) {
+        dayService.deleteAllByUserId(username);
         if (dayCount <= 0) {
             return Collections.emptyList();
         }
@@ -35,7 +33,7 @@ public class DayGeneratorImpl implements DayGenerator {
         List<Day> result = new ArrayList<>(dayCount);
 
         for (int idx = 0; idx < dayCount; idx++) {
-            Day day = generateOneDay(date, dietTypeId, caloriesTypeId);
+            Day day = generateOneDay(username, date, dietTypeId, caloriesTypeId);
             day = dayService.create(day);
             result.add(day);
 
@@ -44,17 +42,17 @@ public class DayGeneratorImpl implements DayGenerator {
         return result;
     }
 
-    private Day generateOneDay(LocalDate date, String dietTypeId, String caloriesTypeId) {
+    private Day generateOneDay(String username, LocalDate date, String dietTypeId, String caloriesTypeId) {
         List<Receipt> receipts = new ArrayList<>();
         proxy.getMealtimes().forEach(mealtime ->
                 receipts.add(generateOneReceipt(mealtime, dietTypeId, caloriesTypeId)));
-        return new Day(null, userService.getCurrentUserId(), date, receipts);
+        return new Day(null, username, date, receipts);
     }
 
     private Receipt generateOneReceipt(Mealtime mealtime,
                                        String dietTypeId, String caloriesTypeId) {
         Random random = new Random();
-        var receiptList = proxy.getReceiptForMeal(mealtime.getId(), dietTypeId, caloriesTypeId);
+        List<Receipt> receiptList = proxy.getReceiptForMeal(mealtime.getId(), dietTypeId, caloriesTypeId);
         if (receiptList.isEmpty()) {
             return null;
         }

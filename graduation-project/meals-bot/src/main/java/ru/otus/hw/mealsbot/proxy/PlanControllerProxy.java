@@ -9,23 +9,26 @@ import ru.otus.hw.mealsbot.models.PricePosition;
 import java.util.List;
 
 @FeignClient(name = "meal-configurator", contextId = "bot-meals",
-    url = "http://localhost:8282")
+    url = "${meals-proxy.configurator}")
 public interface PlanControllerProxy {
-    @GetMapping("/api/meal-list/{diet_type_id}/{calories_type_id}/{day_count}")
-    List<Day> mealList(@PathVariable("diet_type_id") String dietTypeId,
-                       @PathVariable("calories_type_id") String caloriesTypeId,
-                       @PathVariable("day_count") int dayCount);
+    @GetMapping("/api/meal-list/{username}/{diet_type_id}/{calories_type_id}/{day_count}")
+    List<Day> mealList(@PathVariable("username") String username,
+                                     @PathVariable("diet_type_id") String dietTypeId,
+                                     @PathVariable("calories_type_id") String caloriesTypeId,
+                                     @PathVariable("day_count") int dayCount);
 
 
-    @GetMapping("/api/meal-list")
-    List<Day> getMealsForUser();
+    @GetMapping("/api/meal-list/{username}")
+    List<Day> getMealsForUser(@PathVariable("username") String username);
 
-    @GetMapping("/api/meal-list/{date}")
-    Day getMealsOnDayForUser(@PathVariable("date") String dateStr);
+    @GetMapping("/api/meal-list/{username}/{date}")
+    Day getMealsOnDayForUser(@PathVariable("username") String username,
+                                    @PathVariable("date") String dateStr);
 
-    @GetMapping("/api/buy-list")
-    List<PricePosition> getBuyMap();
+    @GetMapping("/api/buy-list/{username}")
+    List<PricePosition> geBuyMap(@PathVariable("username") String username);
 
-    @GetMapping("/api/buy-list/{date}")
-    List<PricePosition> getBuyMapForDate(@PathVariable("date") String dateStr);
+    @GetMapping("/api/buy-list/{username}/{date}")
+    List<PricePosition> geBuyMap(@PathVariable("username") String username,
+                                        @PathVariable("date") String dateStr);
 }

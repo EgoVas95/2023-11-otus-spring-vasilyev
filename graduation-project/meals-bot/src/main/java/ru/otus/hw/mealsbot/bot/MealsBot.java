@@ -28,9 +28,11 @@ public class MealsBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         long chatId = 0;
         String receivedMessage = null;
+        String username = null;
 
         if (update.hasMessage()) {
             chatId = update.getMessage().getChatId();
+            username = update.getMessage().getFrom().getUserName();
 
             if (update.getMessage().hasText()) {
                 receivedMessage = update.getMessage().getText();
@@ -38,8 +40,9 @@ public class MealsBot extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             chatId = update.getCallbackQuery().getMessage().getChatId();
             receivedMessage = update.getCallbackQuery().getData();
+            username = update.getCallbackQuery().getFrom().getUserName();
         }
-        var sm = parser.parse(chatId, receivedMessage);
+        var sm = parser.parse(username, chatId, receivedMessage);
         if (sm != null) {
             sendMsgWithRetry(sm);
         }
@@ -49,23 +52,39 @@ public class MealsBot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException ex) {
-            try {
-                List<String> textList = splitStr(sendMessage.getText(), 2048);
-                for (String text : textList) {
-                    SendMessage sm = new SendMessage();
-                    sm.setChatId(sendMessage.getChatId());
-                    sm.setText(text);
-                    execute(sm);
-                }
-                SendMessage sm = new SendMessage();
-                sm.setText("_______________________");
-                sm.setChatId(sendMessage.getChatId());
-                sm.setReplyMarkup(sendMessage.getReplyMarkup());
-                execute(sm);
-            } catch (TelegramApiException e) {
-                log.error("send ex", e);
-            }
+            retry(sendMessage);
         }
+    }
+
+    private void retry(SendMessage sendMessage) {
+        try {
+            if (sendMessage.getText().length() < 2048) {
+                SendMessage sm = new SendMessage();
+                sm.setChatId(sendMessage.getChatId());
+                sm.setText(sendMessage.getText());
+                execute(sm);
+            } else {
+                sendLongMsg(sendMessage);
+            }
+        } catch (TelegramApiException e) {
+            log.error("send ex", e);
+        }
+    }
+
+    private void sendLongMsg(SendMessage sendMessage)
+            throws TelegramApiException {
+        List<String> textList = splitStr(sendMessage.getText(), 2048);
+        for (String text : textList) {
+            SendMessage sm = new SendMessage();
+            sm.setChatId(sendMessage.getChatId());
+            sm.setText(text);
+            execute(sm);
+        }
+        SendMessage sm = new SendMessage();
+        sm.setText("Выберите один из вариантов ниже");
+        sm.setChatId(sendMessage.getChatId());
+        sm.setReplyMarkup(sendMessage.getReplyMarkup());
+        execute(sm);
     }
 
     private List<String> splitStr(String text, int n) {

@@ -11,18 +11,18 @@ import ru.otus.hw.mealsbot.bot.commands.CommandsEnum;
 public class MessageParser {
     private final MessageHandling messageHandling;
 
-    public SendMessage parse(long chatId, String receivedMessage) {
+    public SendMessage parse(String username, long chatId, String receivedMessage) {
         if (receivedMessage == null || receivedMessage.isEmpty()) {
             return null;
         }
         receivedMessage = receivedMessage.trim().toLowerCase();
         if (receivedMessage.startsWith(Buttons.GENERATE_MARK)) {
-            return messageHandling.generateProcess(chatId, receivedMessage);
+            return messageHandling.generateProcess(username, chatId, receivedMessage);
         }
 
         for (CommandsEnum command : CommandsEnum.values()) {
             if (command.getCommandName().equals(receivedMessage)) {
-                return messageHandling.handleCommand(command, chatId, receivedMessage);
+                return messageHandling.handleCommand(username, command, chatId, receivedMessage);
             }
         }
         return null;

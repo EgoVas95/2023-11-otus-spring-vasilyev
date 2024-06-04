@@ -11,15 +11,21 @@ public class ReceiptConverter {
     private final ReceiptPositionConverter positionConverter;
 
     public String toString(Receipt receipt) {
+        if (receipt == null) {
+            return "";
+        }
+
         final StringBuilder positionBuilder = new StringBuilder();
-
         long sumCalories = 0L;
-        for(ReceiptPosition position : receipt.getReceiptPositionsList()) {
-            positionBuilder.append("- ").append(positionConverter.toString(position))
-                    .append("\n");
 
-            var mult = position.getQuantity();
-            sumCalories += position.getServing().getCalories() * mult;
+        if (receipt.getReceiptPositionsList() != null) {
+            for (ReceiptPosition position : receipt.getReceiptPositionsList()) {
+                positionBuilder.append("- ").append(positionConverter.toString(position))
+                        .append("\n");
+
+                var mult = position.getQuantity();
+                sumCalories += position.getServing().getCalories() * mult;
+            }
         }
 
         return receipt.getMealtime().getName() + "\n" +

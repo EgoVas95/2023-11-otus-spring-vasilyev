@@ -19,12 +19,10 @@ public class BuyMapGeneratorImpl implements BuyMapGenerator {
 
     private final DayServiceImpl dayService;
 
-    private final UserServiceImpl userService;
-
     @Override
-    public List<PricePosition> generateBuyList() {
+    public List<PricePosition> generateBuyList(String username) {
         Map<Serving, Long> resultMap = new HashMap<>();
-        dayService.findAllByUserId(userService.getCurrentUserId())
+        dayService.findAllByUserId(username)
                 .forEach(day -> buyMapForDay(resultMap, day));
 
         return resultMap.keySet().stream()
@@ -33,9 +31,9 @@ public class BuyMapGeneratorImpl implements BuyMapGenerator {
     }
 
     @Override
-    public Map<Serving, Long> generateBuyMapByDay(LocalDate date) {
+    public Map<Serving, Long> generateBuyMapByDay(String username, LocalDate date) {
         return buyMapForDay(dayService.findFirstByUserIdAndDate(
-                userService.getCurrentUserId(), date));
+                username, date));
     }
 
     private Map<Serving, Long> buyMapForDay(Day day) {

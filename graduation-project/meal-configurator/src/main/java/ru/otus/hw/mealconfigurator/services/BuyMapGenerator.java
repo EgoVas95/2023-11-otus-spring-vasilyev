@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface BuyMapGenerator {
-    List<PricePosition> generateBuyList();
+    List<PricePosition> generateBuyList(String username);
 
-    Map<Serving, Long> generateBuyMapByDay(LocalDate date);
+    Map<Serving, Long> generateBuyMapByDay(String username, LocalDate date);
 }

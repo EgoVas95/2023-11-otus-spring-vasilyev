@@ -5,5 +5,5 @@ import ru.otus.hw.mealconfigurator.model.Day;
 import java.util.List;
 
 public interface DayGenerator {
-    List<Day> generate(String dietTypeId, String caloriesTypeId, int dayCount);
+    List<Day> generate(String username, String dietTypeId, String caloriesTypeId, int dayCount);
 }

@@ -3,15 +3,11 @@ server:
 spring:
   application:
     name: meals-bot
-  data:
-    mongodb:
-      port: 2888
-      database: receipts
-      host: localhost
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:9888/eureka/
 bot:
   name: "MealsAndBuyBot"
   token: 7309531768:AAEr9sfKUoAKIpLuL3Zr0DMPPo1qh4vxEEk
+
+
+meals-proxy:
+  receipts: http://localhost:8181
+  configurator: http://localhost:8282

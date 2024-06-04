@@ -1,52 +1,5 @@
 version: '3.9'
 services:
-  postgres:
-    image: "postgres"
-    ports:
-      - "15432:5432"
-    environment:
-      POSTGRES_DB: productsDb
-      POSTGRES_USER: productUser
-      POSTGRES_PASSWORD: prodPwdDb
-    volumes:
-      - ./db-data/:/var/lib/postgresql/data/
-      - /receipts/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U productUser -d productsDb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          memory: 2G
-    networks:
-      - product-network
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:16.1.1
-    container_name: keycloak
-    ports:
-      - "8484:8080"
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
-      DB_DATABASE: productsDb
-      DB_USER: productUser
-      DB_PASSWORD: prodPwdDb
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-      KEYCLOAK_IMPORT: /opt/jboss/keycloak/standalone/configuration/realm-export.json
-    volumes:
-      - ./keycloak/realm-export.json:/opt/jboss/keycloak/standalone/configuration/realm-export.json
-    restart: unless-stopped
-    depends_on:
-      - postgres
-    networks:
-      - product-network
-
   mongo:
     image: mongo
     ports:
@@ -54,21 +7,59 @@ services:
     container_name: mongo
     restart: always
 
+  eureka_server:
+    build:
+      context: eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "9595:9888"
+    depends_on:
+      - mongo
+
   products_app:
     build:
       context: receipts
       dockerfile: Dockerfile
     ports:
-      - "9880:8181"
+      - "9191:8181"
     depends_on:
-      - postgres
-      - keycloak
+      - eureka_server
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/productsDb
-      - SPRING_DATASOURCE_USERNAME=productUser
-      - SPRING_DATASOURCE_PASSWORD=prodPwdDb
-      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI=http://keycloak:8484/realms/product_realm
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_KEYCLOAK_ISSUER=http://keycloak:8484/realms/product_realm
+      - SPRING_DATA_MONGODB_PORT=2888
+      - SPRING_DATA_MONGODB_DATABASE=receipts
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - eureka.client.service-url.defaultZone=http://eureka_server:9888/eureka/
+    networks:
+      - product-network
+
+  meal_configurator:
+    build:
+      context: meal-configurator
+      dockerfile: Dockerfile
+    ports:
+      - "9292:8282"
+    depends_on:
+      - eureka_server
+    environment:
+      - SPRING_DATA_MONGODB_PORT=2888
+      - SPRING_DATA_MONGODB_DATABASE=day-meals
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - eureka.client.service-url.defaultZone=http://eureka_server:9888/eureka/
+    networks:
+      - product-network
+
+  meal-bot:
+    build:
+      context: meals-bot
+      dockerfile: Dockerfile
+    ports:
+      - "9393:8383"
+    depends_on:
+      - products_app
+      - meal_configurator
+    environment:
+      - meals-proxy.receipts=http://products_app:9191
+      - meals-proxy.configurator=http://meal_configurator:9292
     networks:
       - product-network
 

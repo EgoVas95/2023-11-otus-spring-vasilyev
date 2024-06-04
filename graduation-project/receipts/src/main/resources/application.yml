@@ -11,26 +11,6 @@ spring:
       port: 2888
       database: receipts
       host: localhost
-  cloud:
-    openfeign:
-      oauth2:
-        enabled: true
-        clientRegistrationId: keycloak
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: meals.client
-            client-secret: S2IUGbJeZOaYB3hVVONQwFSr5ItHwX4p
-            authorization-grant-type: authorization_code
-            scope:
-              - openid
-              - profile
-        provider:
-          keycloak:
-            issuer-uri: http://localhost:8484/auth/realms/meals.keycloak
-            user-name-attribute: preferred_username
 eureka:
   client:
     service-url:
