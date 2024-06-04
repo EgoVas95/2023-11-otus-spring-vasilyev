@@ -26,20 +26,21 @@ services:
       - product-network
 
   keycloak:
-    image: quay.io/keycloak/keycloak
+    image: quay.io/keycloak/keycloak:16.1.1
     container_name: keycloak
-    command:
-      - start-dev
+    ports:
+      - "8484:8080"
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: productsDb
       DB_USER: productUser
       DB_PASSWORD: prodPwdDb
-      KEYCLOAK_USER: user
-      KEYCLOAK_PASSWORD: bitnami
-    ports:
-      - "8484:8080"
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      KEYCLOAK_IMPORT: /opt/jboss/keycloak/standalone/configuration/realm-export.json
+    volumes:
+      - ./keycloak/realm-export.json:/opt/jboss/keycloak/standalone/configuration/realm-export.json
     restart: unless-stopped
     depends_on:
       - postgres
