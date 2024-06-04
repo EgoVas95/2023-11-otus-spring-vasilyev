@@ -1,0 +1,13 @@
+server:
+  port: 8383
+spring:
+  application:
+    name: meals-bot
+bot:
+  name: "MealsAndBuyBot"
+  token: 7309531768:AAEr9sfKUoAKIpLuL3Zr0DMPPo1qh4vxEEk
+
+
+meals-proxy:
+  receipts: http://localhost:8181
+  configurator: http://localhost:8282

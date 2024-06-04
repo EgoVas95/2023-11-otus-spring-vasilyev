@@ -1,0 +1,69 @@
+version: '3.9'
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "2888:27017"
+    container_name: mongo
+    restart: always
+
+  eureka_server:
+    build:
+      context: eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "9595:9888"
+    depends_on:
+      - mongo
+
+  products_app:
+    build:
+      context: receipts
+      dockerfile: Dockerfile
+    ports:
+      - "9191:8181"
+    depends_on:
+      - eureka_server
+    environment:
+      - SPRING_DATA_MONGODB_PORT=2888
+      - SPRING_DATA_MONGODB_DATABASE=receipts
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - eureka.client.service-url.defaultZone=http://eureka_server:9888/eureka/
+    networks:
+      - product-network
+
+  meal_configurator:
+    build:
+      context: meal-configurator
+      dockerfile: Dockerfile
+    ports:
+      - "9292:8282"
+    depends_on:
+      - eureka_server
+    environment:
+      - SPRING_DATA_MONGODB_PORT=2888
+      - SPRING_DATA_MONGODB_DATABASE=day-meals
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - eureka.client.service-url.defaultZone=http://eureka_server:9888/eureka/
+    networks:
+      - product-network
+
+  meal-bot:
+    build:
+      context: meals-bot
+      dockerfile: Dockerfile
+    ports:
+      - "9393:8383"
+    depends_on:
+      - products_app
+      - meal_configurator
+    environment:
+      - meals-proxy.receipts=http://products_app:9191
+      - meals-proxy.configurator=http://meal_configurator:9292
+    networks:
+      - product-network
+
+networks:
+  product-network:
+    driver: bridge
+

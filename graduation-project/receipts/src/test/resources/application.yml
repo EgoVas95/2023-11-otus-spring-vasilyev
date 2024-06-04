@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: receipts
+  messages:
+    encoding: UTF-8
+  data:
+    mongodb:
+      port: 2888
+      database: receipts
+      host: localhost
